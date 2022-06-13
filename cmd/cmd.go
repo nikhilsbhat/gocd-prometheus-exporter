@@ -6,6 +6,7 @@ import (
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/exporter"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/gocd"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
@@ -45,9 +46,16 @@ func App() *cli.App {
 		UsageText:            "gocd-prometheus-exporter [flags]",
 		EnableBashCompletion: true,
 		HideHelp:             false,
-		Commands:             []*cli.Command{},
-		Flags:                registerFlags(),
-		Action:               goCdExport,
+		Commands: []*cli.Command{
+			{
+				Name:    "version",
+				Aliases: []string{"v"},
+				Usage:   "version of the gocd-prometheus-exporter",
+				Action:  version.AppVersion,
+			},
+		},
+		Flags:  registerFlags(),
+		Action: goCdExport,
 	}
 }
 

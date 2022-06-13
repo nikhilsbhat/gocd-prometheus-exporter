@@ -1,4 +1,6 @@
 MY_ADDRESS := $(shell ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $$2}' )
+BUILD_ENVIRONMENT?=${ENVIRONMENT}
+GOVERSION?=$(shell go version | awk '{printf $$3}')
 
 .PHONY: help
 help: ## Prints help (only for targets with comments)
@@ -16,5 +18,8 @@ test.setup.purge: ## Teardown prometheus and GoCd setup
 local.build:
 	@go build
 
-local.run:
-	./gocd-prometheus-exporter
+local.build: local.check ## Generates the artifact with the help of 'go build'
+	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser build --rm-dist
+
+lint: ## Lint's application for errors, it is a linters aggregator (https://github.com/golangci/golangci-lint).
+	if [ -z "${DEV}" ]; then golangci-lint run --color always ; else docker run --rm -v $(APP_DIR):/app -w /app golangci/golangci-lint:v1.31-alpine golangci-lint run --color always ; fi
