@@ -5,16 +5,15 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // GetDiskSize retrieves size of the specified path along with type, it would be link if path is symlink
-func (conf *Config) GetDiskSize(path string) (float64, string) {
+func (conf *Config) GetDiskSize(path string) (float64, string, error) {
 	var pathType string
 	fileInfo, err := os.Lstat(path)
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, fmt.Sprintf("stating path %s failed with error %s", path, err.Error()))
+		return 0, "", fmt.Errorf(fmt.Sprintf("stating path %s failed with error %s", path, err.Error()))
 	}
 
 	pathType = common.TypeDir
@@ -22,7 +21,7 @@ func (conf *Config) GetDiskSize(path string) (float64, string) {
 		pathType = common.TypeLink
 	}
 
-	return diskSize(path), pathType
+	return diskSize(path), pathType, nil
 }
 func diskSize(path string) float64 {
 	var dirSize int64 = 0

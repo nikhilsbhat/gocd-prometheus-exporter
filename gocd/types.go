@@ -33,7 +33,7 @@ type Node struct {
 	OS                 string      `json:"operating_system,omitempty"`
 	ConfigState        string      `json:"agent_config_state,omitempty"`
 	Sandbox            string      `json:"sandbox,omitempty"`
-	DiskSpaceAvailable interface{} `json:"free_space,string,omitempty"`
+	DiskSpaceAvailable interface{} `json:"free_space,omitempty"`
 }
 
 // ServerVersion holds information GoCd server
