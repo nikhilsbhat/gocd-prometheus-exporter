@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./:/etc/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+#  agent:
+#    image: gocd/gocd-agent-ubuntu-18.04:v21.3.0
+#    depends_on:
+#      - server
+#    environment:
+#      GO_SERVER_URL: http://server:8153/go
+#      AGENT_AUTO_REGISTER_KEY: 079e578b-87cc-46c9-9ab5-88997fc7ac59
+#      GIT_TRACE: 1
+#      GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=no
+#      GOCD_AGENT_JVM_OPTS: "-Xmx2g"
+#      AGENT_BOOTSTRAPPER_ARGS: "-sslVerificationMode NONE"
+#    restart: on-failure
+#    volumes:
+#      - ~/.ssh:/home/go/.ssh
+#
+#  server:
+#    image: gocd/gocd-server:v21.3.0
+#    environment:
+#      GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=no
+#      GOCD_SERVER_JVM_OPTS: "-Xmx2g"
+#    ports:
+#      - 8153:8153
+#      - 8154:8154
+#    volumes:
+#      - ~/.ssh:/home/go/.ssh
+#      - ./extras/config.xml:/config.xml
+#      - ./extras/server-extra-entrypoint.sh:/docker-entrypoint.d/server-extra-entrypoint.sh
