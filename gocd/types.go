@@ -3,6 +3,7 @@ package gocd
 import (
 	"crypto/tls"
 	"crypto/x509"
+
 	"github.com/go-kit/log"
 	"github.com/go-resty/resty/v2"
 )

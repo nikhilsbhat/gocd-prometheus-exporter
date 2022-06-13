@@ -1,6 +1,14 @@
+GOFMT_FILES?=$(shell find . -not -path "./vendor/*" -type f -name '*.go')
 MY_ADDRESS := $(shell ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $$2}' )
 BUILD_ENVIRONMENT?=${ENVIRONMENT}
 GOVERSION?=$(shell go version | awk '{printf $$3}')
+
+# Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
 
 .PHONY: help
 help: ## Prints help (only for targets with comments)
@@ -15,8 +23,13 @@ test.setup.up: render.prometheus.config ## Brings up prometheus and GoCd setup b
 test.setup.purge: ## Teardown prometheus and GoCd setup
 	@docker-compose -f infrastructure/docker-compose.infra.yaml down
 
-local.build:
-	@go build
+local.fmt: ## Lints all the go code in the application.
+	gofmt -w $(GOFMT_FILES)
+	$(GOBIN)/goimports -w $(GOFMT_FILES)
+
+local.check: local.fmt ## Loads all the dependencies to vendor directory
+	go mod vendor
+	go mod tidy
 
 local.build: local.check ## Generates the artifact with the help of 'go build'
 	GOVERSION=${GOVERSION} BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT} goreleaser build --rm-dist

@@ -2,10 +2,11 @@ package gocd
 
 import (
 	"fmt"
-	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 	"os"
 	"path/filepath"
+
+	"github.com/go-kit/log/level"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // GetDiskSize retrieves size of the specified path along with type, it would be link if path is symlink

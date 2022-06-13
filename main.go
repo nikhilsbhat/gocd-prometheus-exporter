@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/cmd"
 	"log"
 	"os"
+
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/cmd"
 )
 
 func main() {

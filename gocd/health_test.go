@@ -1,10 +1,11 @@
 package gocd
 
 import (
-	"github.com/prometheus/common/promlog"
-	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
+
+	"github.com/prometheus/common/promlog"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConfig_GetHealthInfo(t *testing.T) {

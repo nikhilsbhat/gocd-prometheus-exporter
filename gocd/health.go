@@ -2,9 +2,10 @@ package gocd
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
-	"net/http"
 )
 
 // GetHealthInfo implements method that fetches the details of all warning and errors

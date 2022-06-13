@@ -4,3 +4,4 @@
 gocd-artifact-monitor
 gocd-prometheus-exporter
 prometheus.yml
+/dist

@@ -2,12 +2,13 @@ package exporter
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/gocd"
 	"github.com/prometheus/client_golang/prometheus"
-	"sync"
 )
 
 type Exporter struct {

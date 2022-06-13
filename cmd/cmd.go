@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/exporter"
@@ -11,8 +14,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
 	"github.com/urfave/cli/v2"
-	"io/ioutil"
-	"net/http"
 )
 
 const (
