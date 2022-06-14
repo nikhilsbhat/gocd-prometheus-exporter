@@ -15,6 +15,7 @@ func TestConfig_GetHealthInfo(t *testing.T) {
 			"http://localhost:8153/go",
 			"",
 			"",
+			"info",
 			nil,
 			logger,
 		)

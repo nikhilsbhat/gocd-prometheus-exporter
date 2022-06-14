@@ -50,8 +50,11 @@ type ServerHealth struct {
 }
 
 // NewConfig returns new instance of Config when invoked
-func NewConfig(baseURL, userName, passWord string, caContent []byte, logger log.Logger) *Config {
+func NewConfig(baseURL, userName, passWord, loglevel string, caContent []byte, logger log.Logger) *Config {
 	newClient := resty.New()
+	if loglevel == "debug" {
+		newClient.SetDebug(true)
+	}
 	newClient.SetBaseURL(baseURL)
 	if len(caContent) != 0 {
 		certPool := x509.NewCertPool()

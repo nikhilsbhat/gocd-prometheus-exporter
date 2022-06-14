@@ -93,6 +93,9 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 
 	// fetching pipeline sizes
 	for i, pipeline := range e.pipelinePath {
+		if len(pipeline) == 0 {
+			continue
+		}
 		pipelineSize, pathType, err := e.client.GetDiskSize(pipeline)
 		if err != nil {
 			level.Error(e.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
@@ -27,6 +31,7 @@ const (
 	flagGoCdPassword     = "goCd-password"
 	flagInsecureTLS      = "insecure-tls"
 	flagCaPath           = "ca-path"
+	flagGraceDuration    = "grace-duration"
 )
 
 var (
@@ -37,6 +42,11 @@ var (
 			 <p><a href='%s'>Metrics</a></p>
 			 </body>
 			 </html>`
+	sigChan = make(chan os.Signal)
+)
+
+const (
+	defaultGraceDuration = 5
 )
 
 // App returns the cli for gocd-prometheus-exporter
@@ -118,14 +128,18 @@ func registerFlags() []cli.Flag {
 			Usage:   "path to file containing CA information to make secure connections to GoCd",
 			Aliases: []string{"ca"},
 		},
+		&cli.DurationFlag{
+			Name:    flagGraceDuration,
+			Usage:   "time duration to wait before stopping the service",
+			Aliases: []string{"d"},
+			Value:   time.Second * defaultGraceDuration,
+		},
 	}
 }
 
-func getRedirectData(endpoint string) string {
-	return fmt.Sprintf(redirectData, endpoint)
-}
-
 func goCdExport(context *cli.Context) error {
+	signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGQUIT)
+
 	promLogConfig := &promlog.Config{Level: &promlog.AllowedLevel{}, Format: &promlog.AllowedFormat{}}
 	if err := promLogConfig.Level.Set(context.String(flagLogLevel)); err != nil {
 		return err
@@ -146,6 +160,7 @@ func goCdExport(context *cli.Context) error {
 		context.String(flagGoCdBaseURL),
 		context.String(flagGoCdUsername),
 		context.String(flagGoCdPassword),
+		context.String(flagLogLevel),
 		caContent,
 		logger,
 	)
@@ -158,15 +173,29 @@ func goCdExport(context *cli.Context) error {
 
 	port := context.String(flagExporterPort)
 	endpoint := context.String(flagExporterEndpoint)
+
+	// listens to terminate signal
+	go func() {
+		sig := <-sigChan
+		level.Info(logger).Log("msg", fmt.Sprintf("caught signal %v: terminating in %v", sig, context.Duration(flagGraceDuration))) //nolint:errcheck
+		time.Sleep(context.Duration(flagGraceDuration))
+		level.Info(logger).Log("msg", fmt.Sprintf("terminate gocd-prometheus-exporter running on port: %s", port)) //nolint:errcheck
+		os.Exit(0)
+	}()
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(getRedirectData(endpoint)))
 	})
 
-	level.Debug(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %s", port))         //nolint:errcheck
-	level.Debug(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", endpoint)) //nolint:errcheck
+	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %s", port))         //nolint:errcheck
+	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", endpoint)) //nolint:errcheck
 	http.Handle(endpoint, promhttp.Handler())
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		return err
 	}
 	return nil
+}
+
+func getRedirectData(endpoint string) string {
+	return fmt.Sprintf(redirectData, endpoint)
 }
