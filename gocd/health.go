@@ -13,7 +13,7 @@ func (conf *Config) GetHealthInfo() ([]ServerHealth, error) {
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
-	level.Debug(conf.logger).Log(common.LogCategoryMsg, "trying to retrieve GoCd server health status")
+	level.Debug(conf.logger).Log(common.LogCategoryMsg, "trying to retrieve GoCd server health status") //nolint:errcheck
 
 	var health []ServerHealth
 	resp, err := conf.client.R().SetResult(&health).Get(common.GoCdServerHealthEndpoint)
@@ -24,6 +24,6 @@ func (conf *Config) GetHealthInfo() ([]ServerHealth, error) {
 		return nil, fmt.Errorf(fmt.Sprintf(common.GoCdReturnErrorMessage, resp.StatusCode()))
 	}
 
-	level.Debug(conf.logger).Log(common.LogCategoryMsg, "successfully retrieved GoCd server health status")
+	level.Debug(conf.logger).Log(common.LogCategoryMsg, "successfully retrieved GoCd server health status") //nolint:errcheck
 	return health, nil
 }

@@ -71,7 +71,7 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	// fetching server health status
 	healthInfo, err := e.client.GetHealthInfo()
 	if err != nil {
-		level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving server health information errored with: %s", err.Error()))
+		level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving server health information errored with: %s", err.Error())) //nolint:errcheck
 	}
 	for _, health := range healthInfo {
 		e.serverHealth.WithLabelValues(health.Level, health.Message).Set(1)
@@ -80,7 +80,7 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	// fetching all node information
 	nodes, err := e.client.GetNodesInfo()
 	if err != nil {
-		level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving agents information errored with: %s", err.Error()))
+		level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving agents information errored with: %s", err.Error())) //nolint:errcheck
 	}
 	e.agentsCount.WithLabelValues("all").Set(float64(len(nodes.Config.Config)))
 	e.agentDown.Reset()
@@ -95,12 +95,12 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	for i, pipeline := range e.pipelinePath {
 		pipelineSize, pathType, err := e.client.GetDiskSize(pipeline)
 		if err != nil {
-			level.Error(e.logger).Log(common.LogCategoryErr, err.Error())
+			level.Error(e.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
 		}
 		if i == 0 {
 			pathType = "all"
 		}
-		level.Debug(e.logger).Log(common.LogCategoryMsg, fmt.Sprintf("pipeline present at %s would be scanned", pipeline))
+		level.Debug(e.logger).Log(common.LogCategoryMsg, fmt.Sprintf("pipeline present at %s would be scanned", pipeline)) //nolint:errcheck
 		e.pipelinesDiskUsage.WithLabelValues(pipeline, pathType).Set(pipelineSize)
 	}
 
@@ -124,7 +124,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	e.mutex.Lock() // To protect metrics from concurrent collects.
 	defer e.mutex.Unlock()
 	if err := e.collect(ch); err != nil {
-		level.Error(e.logger).Log(common.LogCategoryErr, "Error scraping GoCd:", "err", err)
+		level.Error(e.logger).Log(common.LogCategoryErr, "Error scraping GoCd:", "err", err) //nolint:errcheck
 		e.scrapeFailures.Inc()
 		e.scrapeFailures.Collect(ch)
 	}

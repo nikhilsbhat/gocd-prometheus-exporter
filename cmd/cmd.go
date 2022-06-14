@@ -137,7 +137,7 @@ func goCdExport(context *cli.Context) error {
 	if len(caPath) != 0 {
 		ca, err := ioutil.ReadFile(caPath)
 		if err != nil {
-			level.Error(logger).Log(common.LogCategoryErr, fmt.Sprintf("an error occured while reading CA file: %s", caPath))
+			level.Error(logger).Log(common.LogCategoryErr, fmt.Sprintf("an error occured while reading CA file: %s", caPath)) //nolint:errcheck
 		}
 		caContent = ca
 	}
@@ -150,10 +150,9 @@ func goCdExport(context *cli.Context) error {
 		logger,
 	)
 
-	pipelinePaths := context.StringSlice(flagPipelinePath)
-	if len(context.String(flagPipelinePathRoot)) != 0 {
-		pipelinePaths = append(pipelinePaths, context.String(flagPipelinePathRoot))
-	}
+	pipelinePaths := make([]string, 0)
+	pipelinePaths = append(pipelinePaths, context.String(flagPipelinePathRoot))
+	pipelinePaths = append(pipelinePaths, context.StringSlice(flagPipelinePath)...)
 	goCdExporter := exporter.NewExporter(logger, client, pipelinePaths)
 	prometheus.MustRegister(goCdExporter)
 
@@ -163,8 +162,8 @@ func goCdExport(context *cli.Context) error {
 		_, _ = w.Write([]byte(getRedirectData(endpoint)))
 	})
 
-	level.Debug(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %s", port))
-	level.Debug(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", endpoint))
+	level.Debug(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %s", port))         //nolint:errcheck
+	level.Debug(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", endpoint)) //nolint:errcheck
 	http.Handle(endpoint, promhttp.Handler())
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
 		return err

@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/go-kit/log/level"
+
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
@@ -19,6 +21,12 @@ func (conf *Config) GetDiskSize(path string) (float64, string, error) {
 	pathType = common.TypeDir
 	if fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink {
 		pathType = common.TypeLink
+		originPath, err := os.Readlink(path)
+		if err != nil {
+			return 0, "", err
+		}
+		level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("path %s is link to %s so fetching size of destination", path, originPath)) //nolint:errcheck
+		path = originPath
 	}
 
 	return diskSize(path), pathType, nil
@@ -39,7 +47,7 @@ func diskSize(path string) float64 {
 	}
 
 	go func() {
-		filepath.Walk(path, readSize)
+		filepath.Walk(path, readSize) //nolint:errcheck
 		close(sizes)
 	}()
 
