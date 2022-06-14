@@ -17,6 +17,14 @@ const (
 	ExporterConfigFileExt    = "yaml"
 )
 
+const (
+	MetricAgentsCount    = "agents_count"
+	MetricAgentDiskSpace = "agent_disk_space"
+	MetricAgentDown      = "agent_down"
+	MetricPipelineSize   = "pipeline_size"
+	MetricServerHealth   = "server_health"
+)
+
 func Float(value interface{}) float64 {
 	switch value.(type) {
 	case int64:

@@ -35,6 +35,7 @@ const (
 	flagCaPath           = "ca-path"
 	flagGraceDuration    = "grace-duration"
 	flagConfigPath       = "config-file"
+	flagSkipMetrics      = "skip-metrics"
 )
 
 var (
@@ -143,6 +144,11 @@ func registerFlags() []cli.Flag {
 			Aliases: []string{"c"},
 			Value:   filepath.Join(os.Getenv("HOME"), fmt.Sprintf("%s.%s", common.ExporterConfigFileName, common.ExporterConfigFileExt)),
 		},
+		&cli.StringSliceFlag{
+			Name:    flagSkipMetrics,
+			Usage:   "list of metrics to be skipped",
+			Aliases: []string{"sk"},
+		},
 	}
 }
 
@@ -158,6 +164,7 @@ func goCdExport(context *cli.Context) error {
 		Port:                  context.Int(flagExporterPort),
 		Endpoint:              context.String(flagExporterEndpoint),
 		LogLevel:              context.String(flagLogLevel),
+		SkipMetrics:           context.StringSlice(flagSkipMetrics),
 	}
 
 	finalConfig, err := exporter.GetConfig(config, context.String(flagConfigPath))
@@ -194,7 +201,7 @@ func goCdExport(context *cli.Context) error {
 	pipelinePaths := make([]string, 0)
 	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesRootPath)
 	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesPath...)
-	goCdExporter := exporter.NewExporter(logger, client, pipelinePaths)
+	goCdExporter := exporter.NewExporter(logger, client, pipelinePaths, finalConfig.SkipMetrics)
 	prometheus.MustRegister(goCdExporter)
 
 	// listens to terminate signal

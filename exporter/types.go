@@ -13,6 +13,7 @@ type Exporter struct {
 	client             *gocd.Config
 	logger             log.Logger
 	pipelinePath       []string
+	skipMetrics        []string
 	scrapeFailures     prometheus.Counter
 	agentsCount        *prometheus.GaugeVec
 	agentDisk          *prometheus.GaugeVec
@@ -32,4 +33,5 @@ type Config struct {
 	Port                  int      `json:"port,omitempty" yaml:"port,omitempty"`
 	Endpoint              string   `json:"metric-endpoint,omitempty" yaml:"metric-endpoint,omitempty"`
 	LogLevel              string   `json:"log-level,omitempty" yaml:"log-level,omitempty"`
+	SkipMetrics           []string `json:"skip-metrics,omitempty" yaml:"skip-metrics,omitempty"`
 }

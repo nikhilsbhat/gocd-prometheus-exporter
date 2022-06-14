@@ -9,6 +9,7 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
 	github.com/stretchr/testify v1.4.0
+	github.com/thoas/go-funk v0.9.2
 	github.com/urfave/cli/v2 v2.8.1
 	gopkg.in/yaml.v2 v2.4.0
 )
