@@ -14,6 +14,18 @@ builds:
     ldflags:
       - -s -w -X github.com/nikhilsbhat/gocd-prometheus-exporter/version.Version={{.Version}} -X github.com/nikhilsbhat/gocd-prometheus-exporter/version.Env={{.Env.BUILD_ENVIRONMENT}} -X github.com/nikhilsbhat/gocd-prometheus-exporter/version.BuildDate={{.Date}} -X github.com/nikhilsbhat/gocd-prometheus-exporter/version.Revision={{.Commit}} -X github.com/nikhilsbhat/gocd-prometheus-exporter/version.GoVersion={{.Env.GOVERSION}} -X github.com/nikhilsbhat/gocd-prometheus-exporter/version.Platform={{ .Os }}/{{ .Arch }}
 
+dockers:
+  - goos: linux
+    goarch: amd64
+    ids:
+      - gocd-prometheus-exporter
+    skip_push: false
+    image_templates:
+      - "basnik/gocd-prometheus-exporter:latest"
+      - "basnik/gocd-prometheus-exporter:{{ .Tag }}"
+      - "basnik/gocd-prometheus-exporter:{{ .Tag }}-{{ .Env.GOVERSION }}"
+    dockerfile: Dockerfile
+
 archives:
   - format: 'tar.gz'
     replacements:
