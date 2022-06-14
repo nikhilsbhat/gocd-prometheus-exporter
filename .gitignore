@@ -7,3 +7,4 @@ prometheus.yml
 /dist
 cover.out
 cover.html
+gocd-prometheus-exporter.yaml

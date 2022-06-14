@@ -13,6 +13,8 @@ const (
 	GoCdServerHealthEndpoint = "/api/server_health_messages"
 	GoCdDisconnectedState    = "LostContact"
 	GoCdReturnErrorMessage   = `gocd server returned code %d with message`
+	ExporterConfigFileName   = "gocd-prometheus-exporter"
+	ExporterConfigFileExt    = "yaml"
 )
 
 func Float(value interface{}) float64 {

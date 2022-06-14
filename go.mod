@@ -5,10 +5,12 @@ go 1.17
 require (
 	github.com/go-kit/log v0.2.0
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/imdario/mergo v0.3.13
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli/v2 v2.8.1
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -27,5 +29,4 @@ require (
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

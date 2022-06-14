@@ -3,9 +3,11 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -32,6 +34,7 @@ const (
 	flagInsecureTLS      = "insecure-tls"
 	flagCaPath           = "ca-path"
 	flagGraceDuration    = "grace-duration"
+	flagConfigPath       = "config-file"
 )
 
 var (
@@ -88,10 +91,10 @@ func registerFlags() []cli.Flag {
 			Aliases: []string{"log"},
 			Value:   "info",
 		},
-		&cli.StringFlag{
+		&cli.IntFlag{
 			Name:    flagExporterPort,
 			Usage:   "port on which the metrics to be exposed",
-			Value:   "8090",
+			Value:   8090,
 			Aliases: []string{"p"},
 		},
 		&cli.StringFlag{
@@ -134,63 +137,83 @@ func registerFlags() []cli.Flag {
 			Aliases: []string{"d"},
 			Value:   time.Second * defaultGraceDuration,
 		},
+		&cli.StringFlag{
+			Name:    flagConfigPath,
+			Usage:   "path to file containing configurations for exporter",
+			Aliases: []string{"c"},
+			Value:   filepath.Join(os.Getenv("HOME"), fmt.Sprintf("%s.%s", common.ExporterConfigFileName, common.ExporterConfigFileExt)),
+		},
 	}
 }
 
 func goCdExport(context *cli.Context) error {
+	config := exporter.Config{
+		GoCdBaseURL:           context.String(flagGoCdBaseURL),
+		GoCdUserName:          context.String(flagGoCdUsername),
+		GoCdPassword:          context.String(flagGoCdPassword),
+		InsecureTLS:           context.Bool(flagInsecureTLS),
+		GoCdPipelinesPath:     context.StringSlice(flagPipelinePath),
+		GoCdPipelinesRootPath: context.String(flagPipelinePathRoot),
+		CaPath:                context.String(flagCaPath),
+		Port:                  context.Int(flagExporterPort),
+		Endpoint:              context.String(flagExporterEndpoint),
+		LogLevel:              context.String(flagLogLevel),
+	}
+
+	finalConfig, err := exporter.GetConfig(config, context.String(flagConfigPath))
+	if err != nil {
+		log.Println(err)
+	}
+
 	signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGQUIT)
 
 	promLogConfig := &promlog.Config{Level: &promlog.AllowedLevel{}, Format: &promlog.AllowedFormat{}}
-	if err := promLogConfig.Level.Set(context.String(flagLogLevel)); err != nil {
+	if err := promLogConfig.Level.Set(finalConfig.LogLevel); err != nil {
 		return err
 	}
 	logger := promlog.New(promLogConfig)
 
-	caPath := context.String(flagCaPath)
 	var caContent []byte
-	if len(caPath) != 0 {
-		ca, err := ioutil.ReadFile(caPath)
+	if len(finalConfig.CaPath) != 0 {
+		ca, err := ioutil.ReadFile(finalConfig.CaPath)
 		if err != nil {
-			level.Error(logger).Log(common.LogCategoryErr, fmt.Sprintf("an error occured while reading CA file: %s", caPath)) //nolint:errcheck
+			level.Error(logger).Log(common.LogCategoryErr, fmt.Sprintf("an error occured while reading CA file: %s", finalConfig.CaPath)) //nolint:errcheck
 		}
 		caContent = ca
 	}
 
 	client := gocd.NewConfig(
-		context.String(flagGoCdBaseURL),
-		context.String(flagGoCdUsername),
-		context.String(flagGoCdPassword),
-		context.String(flagLogLevel),
+		finalConfig.GoCdBaseURL,
+		finalConfig.GoCdUserName,
+		finalConfig.GoCdPassword,
+		finalConfig.LogLevel,
 		caContent,
 		logger,
 	)
 
 	pipelinePaths := make([]string, 0)
-	pipelinePaths = append(pipelinePaths, context.String(flagPipelinePathRoot))
-	pipelinePaths = append(pipelinePaths, context.StringSlice(flagPipelinePath)...)
+	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesRootPath)
+	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesPath...)
 	goCdExporter := exporter.NewExporter(logger, client, pipelinePaths)
 	prometheus.MustRegister(goCdExporter)
-
-	port := context.String(flagExporterPort)
-	endpoint := context.String(flagExporterEndpoint)
 
 	// listens to terminate signal
 	go func() {
 		sig := <-sigChan
 		level.Info(logger).Log("msg", fmt.Sprintf("caught signal %v: terminating in %v", sig, context.Duration(flagGraceDuration))) //nolint:errcheck
 		time.Sleep(context.Duration(flagGraceDuration))
-		level.Info(logger).Log("msg", fmt.Sprintf("terminate gocd-prometheus-exporter running on port: %s", port)) //nolint:errcheck
+		level.Info(logger).Log("msg", fmt.Sprintf("terminate gocd-prometheus-exporter running on port: %d", finalConfig.Port)) //nolint:errcheck
 		os.Exit(0)
 	}()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(getRedirectData(endpoint)))
+		_, _ = w.Write([]byte(getRedirectData(finalConfig.Endpoint)))
 	})
 
-	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %s", port))         //nolint:errcheck
-	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", endpoint)) //nolint:errcheck
-	http.Handle(endpoint, promhttp.Handler())
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil); err != nil {
+	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %s", finalConfig.Port))         //nolint:errcheck
+	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", finalConfig.Endpoint)) //nolint:errcheck
+	http.Handle(finalConfig.Endpoint, promhttp.Handler())
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", finalConfig.Port), nil); err != nil {
 		return err
 	}
 	return nil

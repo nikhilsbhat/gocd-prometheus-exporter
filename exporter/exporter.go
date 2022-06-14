@@ -2,7 +2,6 @@ package exporter
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
@@ -10,19 +9,6 @@ import (
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/gocd"
 	"github.com/prometheus/client_golang/prometheus"
 )
-
-type Exporter struct {
-	mutex              sync.Mutex
-	client             *gocd.Config
-	logger             log.Logger
-	pipelinePath       []string
-	scrapeFailures     prometheus.Counter
-	agentsCount        *prometheus.GaugeVec
-	agentDisk          *prometheus.GaugeVec
-	pipelinesDiskUsage *prometheus.GaugeVec
-	agentDown          *prometheus.GaugeVec
-	serverHealth       *prometheus.GaugeVec
-}
 
 func NewExporter(logger log.Logger, client *gocd.Config, paths []string) *Exporter {
 	return &Exporter{
