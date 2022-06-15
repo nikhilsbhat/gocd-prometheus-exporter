@@ -9,7 +9,7 @@ import (
 )
 
 // GetNodesInfo implements method that fetches the details of all the agents present in GoCd server
-func (conf *Config) GetNodesInfo() (NodesConfig, error) {
+func (conf *Config) GetNodesInfo() ([]Node, error) {
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionSeven,
 	})
@@ -18,11 +18,11 @@ func (conf *Config) GetNodesInfo() (NodesConfig, error) {
 	var nodesConf NodesConfig
 	resp, err := conf.client.R().SetResult(&nodesConf).Get(common.GoCdAgentsEndpoint)
 	if err != nil {
-		return NodesConfig{}, err
+		return nil, err
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return NodesConfig{}, fmt.Errorf(fmt.Sprintf(common.GoCdReturnErrorMessage, resp.StatusCode()))
+		return nil, fmt.Errorf(fmt.Sprintf(common.GoCdReturnErrorMessage, resp.StatusCode()))
 	}
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, "successfully retrieved nodes information from GoCd") //nolint:errcheck
-	return nodesConf, nil
+	return nodesConf.Config.Config, nil
 }

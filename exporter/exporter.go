@@ -2,6 +2,8 @@ package exporter
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/thoas/go-funk"
 
 	"github.com/go-kit/log"
@@ -52,6 +54,30 @@ func NewExporter(logger log.Logger, client *gocd.Config, paths, skipMetrics []st
 		},
 			[]string{"type", "message"},
 		),
+		configRepoCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricConfigRepoCount,
+			Help:      "number of config repos",
+		},
+			[]string{"repos"},
+		),
+		adminCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricSystemAdminsCount,
+			Help:      "number users who are admins in gocd",
+		},
+			[]string{"users"},
+		),
+		backupConfigured: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricConfiguredBackup,
+			Help:      "would be 1 if backup is enabled",
+		}, []string{"success_email", "failure_email"}),
+		pipelineGroupCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricPipelineGroupCount,
+			Help:      "number of pipeline groups",
+		}, []string{"pipeline_groups"}),
 	}
 }
 
@@ -75,13 +101,13 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 	}
 
 	if !funk.Contains(e.skipMetrics, common.MetricAgentsCount) {
-		e.agentsCount.WithLabelValues("all").Set(float64(len(nodes.Config.Config)))
+		e.agentsCount.WithLabelValues("all").Set(float64(len(nodes)))
 		e.agentsCount.Collect(ch)
 	}
 
 	if !funk.Contains(e.skipMetrics, common.MetricAgentDown) || !funk.Contains(e.skipMetrics, common.MetricAgentDiskSpace) {
 		e.agentDown.Reset()
-		for _, node := range nodes.Config.Config {
+		for _, node := range nodes {
 			if node.CurrentState == common.GoCdDisconnectedState {
 				e.agentDown.WithLabelValues(node.Name, node.ID, node.Version, node.OS, node.Sandbox, node.CurrentState).Set(1)
 			}
@@ -91,6 +117,46 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 		}
 		e.agentDown.Collect(ch)
 		e.agentDisk.Collect(ch)
+	}
+
+	if !funk.Contains(e.skipMetrics, common.MetricConfigRepoCount) {
+		repos, err := e.client.GetConfigRepoInfo()
+		if err != nil {
+			level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving config repo information errored with: %s", err.Error())) //nolint:errcheck
+		}
+		e.configRepoCount.WithLabelValues("all").Set(float64(len(repos)))
+		e.configRepoCount.Collect(ch)
+	}
+
+	if !funk.Contains(e.skipMetrics, common.MetricSystemAdminsCount) {
+		admins, err := e.client.GetAdminsInfo()
+		if err != nil {
+			level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving system admin information errored with: %s", err.Error())) //nolint:errcheck
+		}
+		e.adminCount.WithLabelValues("all").Set(float64(len(admins.Users)))
+		e.adminCount.Collect(ch)
+	}
+
+	if !funk.Contains(e.skipMetrics, common.MetricPipelineGroupCount) {
+		groups, err := e.client.GetPipelineGroupInfo()
+		if err != nil {
+			level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving pipeline group information errored with: %s", err.Error())) //nolint:errcheck
+		}
+		e.pipelineGroupCount.WithLabelValues("all").Set(float64(len(groups)))
+		e.pipelineGroupCount.Collect(ch)
+	}
+
+	if !funk.Contains(e.skipMetrics, common.MetricConfiguredBackup) {
+		backup, err := e.client.GetBackupInfo()
+		if err != nil {
+			level.Error(e.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving backup information errored with: %s", err.Error())) //nolint:errcheck
+		}
+		var enabled float64
+		if len(backup.Schedule) != 0 {
+			enabled = 1.0
+		}
+		e.backupConfigured.WithLabelValues(strconv.FormatBool(backup.EmailOnSuccess), strconv.FormatBool(backup.EmailOnFailure)).Set(enabled)
+		e.backupConfigured.Collect(ch)
 	}
 
 	if !funk.Contains(e.skipMetrics, common.MetricPipelineSize) {
@@ -121,6 +187,10 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	e.agentDown.Describe(ch)
 	e.agentDisk.Describe(ch)
 	e.serverHealth.Describe(ch)
+	e.configRepoCount.Describe(ch)
+	e.adminCount.Describe(ch)
+	e.backupConfigured.Describe(ch)
+	e.pipelineGroupCount.Describe(ch)
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {

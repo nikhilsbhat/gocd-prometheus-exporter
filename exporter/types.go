@@ -20,6 +20,10 @@ type Exporter struct {
 	pipelinesDiskUsage *prometheus.GaugeVec
 	agentDown          *prometheus.GaugeVec
 	serverHealth       *prometheus.GaugeVec
+	configRepoCount    *prometheus.GaugeVec
+	pipelineGroupCount *prometheus.GaugeVec
+	backupConfigured   *prometheus.GaugeVec
+	adminCount         *prometheus.GaugeVec
 }
 
 type Config struct {

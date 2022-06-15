@@ -217,7 +217,7 @@ func goCdExport(context *cli.Context) error {
 		_, _ = w.Write([]byte(getRedirectData(finalConfig.Endpoint)))
 	})
 
-	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %s", finalConfig.Port))         //nolint:errcheck
+	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %d", finalConfig.Port))         //nolint:errcheck
 	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", finalConfig.Endpoint)) //nolint:errcheck
 	http.Handle(finalConfig.Endpoint, promhttp.Handler())
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", finalConfig.Port), nil); err != nil {

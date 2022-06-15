@@ -36,7 +36,7 @@ type Node struct {
 	DiskSpaceAvailable interface{} `json:"free_space,omitempty"`
 }
 
-// ServerVersion holds information GoCd server
+// ServerVersion holds version information GoCd server
 type ServerVersion struct {
 	Version     string `json:"version,omitempty"`
 	GitSha      string `json:"git_sha,omitempty"`
@@ -44,9 +44,62 @@ type ServerVersion struct {
 	CommitURL   string `json:"commit_url,omitempty"`
 }
 
+// ServerHealth holds information of GoCd server health
 type ServerHealth struct {
 	Level   string `json:"level,omitempty"`
 	Message string `json:"message,omitempty"`
+}
+
+// ConfigRepoConfig holds information of all config-repos present in GoCd
+type ConfigRepoConfig struct {
+	ConfigRepos ConfigRepos `json:"_embedded,omitempty"`
+}
+
+// ConfigRepos holds information of all config-repos present in GoCd
+type ConfigRepos struct {
+	ConfigRepos []ConfigRepo `json:"config_repos,omitempty"`
+}
+
+// ConfigRepo holds information of the specified config-repo
+type ConfigRepo struct {
+	ID       string `json:"config_repos,omitempty"`
+	Material struct {
+		Type       string `json:"type,omitempty"`
+		Attributes struct {
+			URL        string `json:"url,omitempty"`
+			Branch     string `json:"branch,omitempty"`
+			AutoUpdate bool   `json:"auto_update,omitempty"`
+		}
+	}
+}
+
+type PipelineGroupsConfig struct {
+	PipelineGroups PipelineGroups `json:"_embedded,omitempty"`
+}
+
+type PipelineGroups struct {
+	PipelineGroups []PipelineGroup `json:"groups,omitempty"`
+}
+
+type PipelineGroup struct {
+	Name          string `json:"name,omitempty"`
+	PipelineCount int    `json:"pipeline_count,omitempty"`
+	Pipelines     []struct {
+		Name string `json:"name,omitempty"`
+	}
+}
+
+// SystemAdmins holds information of the system admins present
+type SystemAdmins struct {
+	Roles []string `json:"roles,omitempty"`
+	Users []string `json:"users,omitempty"`
+}
+
+// BackupConfig holds information of the backup configured
+type BackupConfig struct {
+	EmailOnSuccess bool   `json:"email_on_success,omitempty"`
+	EmailOnFailure bool   `json:"email_on_failure,omitempty"`
+	Schedule       string `json:"schedule,omitempty"`
 }
 
 // NewConfig returns new instance of Config when invoked
