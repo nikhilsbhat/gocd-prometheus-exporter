@@ -23,19 +23,21 @@ import (
 )
 
 const (
-	flagPipelinePath     = "pipeline-path"
-	flagPipelinePathRoot = "pipeline-root-path"
-	flagLogLevel         = "log-level"
-	flagExporterPort     = "port"
-	flagExporterEndpoint = "endpoint"
-	flagGoCdBaseURL      = "goCd-server-url"
-	flagGoCdUsername     = "goCd-username"
-	flagGoCdPassword     = "goCd-password"
-	flagInsecureTLS      = "insecure-tls"
-	flagCaPath           = "ca-path"
-	flagGraceDuration    = "grace-duration"
-	flagConfigPath       = "config-file"
-	flagSkipMetrics      = "skip-metrics"
+	flagPipelinePath      = "pipeline-path"
+	flagPipelinePathRoot  = "pipeline-root-path"
+	flagLogLevel          = "log-level"
+	flagExporterPort      = "port"
+	flagExporterEndpoint  = "endpoint"
+	flagGoCdBaseURL       = "goCd-server-url"
+	flagGoCdUsername      = "goCd-username"
+	flagGoCdPassword      = "goCd-password"
+	flagInsecureTLS       = "insecure-tls"
+	flagCaPath            = "ca-path"
+	flagGraceDuration     = "grace-duration"
+	flagConfigPath        = "config-file"
+	flagSkipMetrics       = "skip-metrics"
+	flagDiskCronSchedule  = "disk-cron-schedule"
+	flagOtherCronSchedule = "cron-schedule"
 )
 
 var (
@@ -149,6 +151,23 @@ func registerFlags() []cli.Flag {
 			Usage:   "list of metrics to be skipped",
 			Aliases: []string{"sk"},
 		},
+		&cli.StringFlag{
+			Name: flagOtherCronSchedule,
+			Usage: `cron expression to schedule the metric collection.
+                    		- 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
+                      			and stores the latest values in memory.
+                      		- This is to reduce the load on the GoCd server when api requests are made to GoCd.
+                      		- All expressions supported by https://github.com/robfig/cron will be supported`,
+			Aliases: []string{"cron"},
+			Value:   "@every 30s",
+		},
+		&cli.StringFlag{
+			Name: flagDiskCronSchedule,
+			Usage: `cron expression to schedule the pipeline disk usage metric collection.
+                      		- This is to reduce the reduce resource consumed while computing the pipeline disk size.`,
+			Aliases: []string{"disk-cron"},
+			Value:   "@every 30s",
+		},
 	}
 }
 
@@ -165,6 +184,8 @@ func goCdExport(context *cli.Context) error {
 		Endpoint:              context.String(flagExporterEndpoint),
 		LogLevel:              context.String(flagLogLevel),
 		SkipMetrics:           context.StringSlice(flagSkipMetrics),
+		OtherCron:             context.String(flagOtherCronSchedule),
+		DiskCron:              context.String(flagDiskCronSchedule),
 	}
 
 	finalConfig, err := exporter.GetConfig(config, context.String(flagConfigPath))
@@ -189,19 +210,26 @@ func goCdExport(context *cli.Context) error {
 		caContent = ca
 	}
 
+	pipelinePaths := make([]string, 0)
+	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesRootPath)
+	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesPath...)
+
 	client := gocd.NewConfig(
 		finalConfig.GoCdBaseURL,
 		finalConfig.GoCdUserName,
 		finalConfig.GoCdPassword,
 		finalConfig.LogLevel,
+		finalConfig.OtherCron,
+		finalConfig.DiskCron,
 		caContent,
+		pipelinePaths,
 		logger,
 	)
 
-	pipelinePaths := make([]string, 0)
-	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesRootPath)
-	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesPath...)
-	goCdExporter := exporter.NewExporter(logger, client, pipelinePaths, finalConfig.SkipMetrics)
+	// running schedules
+	client.ScheDulers()
+
+	goCdExporter := exporter.NewExporter(logger, finalConfig.SkipMetrics)
 	prometheus.MustRegister(goCdExporter)
 
 	// listens to terminate signal

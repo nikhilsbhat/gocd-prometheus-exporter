@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/robfig/cron/v3"
+
 	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // GetPipelineGroupInfo fetches information of backup configured in GoCd server.
 func (conf *Config) GetPipelineGroupInfo() ([]PipelineGroup, error) {
+	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
@@ -32,5 +35,23 @@ func (conf *Config) GetPipelineGroupInfo() ([]PipelineGroup, error) {
 			PipelineCount: len(group.Pipelines),
 		})
 	}
+
+	conf.lock.Unlock()
 	return updatedGroupConf, nil
+}
+
+func (conf *Config) configureGetPipelineGroupInfo() {
+	scheduleGetPipelineGroupInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	_, err := scheduleGetPipelineGroupInfo.AddFunc(conf.otherCron, func() {
+		pipelineInfo, err := conf.GetPipelineGroupInfo()
+		if err != nil {
+			level.Error(conf.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving pipeline group information errored with: %s", err.Error())) //nolint:errcheck
+		}
+		CurrentPipelineGroup = pipelineInfo
+	})
+
+	if err != nil {
+		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+	}
+	scheduleGetPipelineGroupInfo.Start()
 }

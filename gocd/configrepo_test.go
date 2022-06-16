@@ -15,6 +15,9 @@ func TestConfig_GetConfigRepoInfo(t *testing.T) {
 			"",
 			"",
 			"info",
+			"",
+			"",
+			nil,
 			nil,
 			logger,
 		)

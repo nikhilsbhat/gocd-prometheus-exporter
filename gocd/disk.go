@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/go-kit/log/level"
+	"github.com/robfig/cron/v3"
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
@@ -31,6 +32,7 @@ func (conf *Config) GetDiskSize(path string) (float64, string, error) {
 
 	return diskSize(path), pathType, nil
 }
+
 func diskSize(path string) float64 {
 	var dirSize int64 = 0
 
@@ -58,4 +60,30 @@ func diskSize(path string) float64 {
 	sizeMB := float64(dirSize)
 
 	return sizeMB
+}
+
+func (conf *Config) configureDiskUsage() {
+	scheduleDiskUsage := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	_, err := scheduleDiskUsage.AddFunc(conf.diskCron, conf.getAndUpdateDiskSize)
+
+	if err != nil {
+		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+	}
+	scheduleDiskUsage.Start()
+}
+
+func (conf *Config) getAndUpdateDiskSize() {
+	conf.lock.Lock()
+	for _, path := range conf.paths {
+		level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("pipeline present at %s would be scanned", path)) //nolint:errcheck
+		size, pathType, err := conf.GetDiskSize(path)
+		if err != nil {
+			level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		}
+		CurrentPipelineSize[path] = PipelineSize{
+			Size: size,
+			Type: pathType,
+		}
+	}
+	defer conf.lock.Unlock()
 }

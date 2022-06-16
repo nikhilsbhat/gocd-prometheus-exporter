@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/robfig/cron/v3"
+
 	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // GetHealthInfo implements method that fetches the details of all warning and errors
 func (conf *Config) GetHealthInfo() ([]ServerHealth, error) {
+	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
@@ -25,5 +28,22 @@ func (conf *Config) GetHealthInfo() ([]ServerHealth, error) {
 	}
 
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, "successfully retrieved GoCd server health status") //nolint:errcheck
+	conf.lock.Unlock()
 	return health, nil
+}
+
+func (conf *Config) configureGetHealthInfo() {
+	scheduleGetHealthInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	_, err := scheduleGetHealthInfo.AddFunc(conf.otherCron, func() {
+		healthInfo, err := conf.GetHealthInfo()
+		if err != nil {
+			level.Error(conf.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving server health information errored with: %s", err.Error())) //nolint:errcheck
+		}
+		CurrentServerHealth = healthInfo
+	})
+
+	if err != nil {
+		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+	}
+	scheduleGetHealthInfo.Start()
 }

@@ -16,6 +16,9 @@ func TestConfig_GetHealthInfo(t *testing.T) {
 			"",
 			"",
 			"info",
+			"",
+			"",
+			nil,
 			nil,
 			logger,
 		)

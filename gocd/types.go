@@ -3,15 +3,30 @@ package gocd
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"sync"
 
 	"github.com/go-kit/log"
 	"github.com/go-resty/resty/v2"
 )
 
+var (
+	CurrentNodeConfig    []Node
+	CurrentServerHealth  []ServerHealth
+	CurrentConfigRepos   []ConfigRepo
+	CurrentPipelineGroup []PipelineGroup
+	CurrentSystemAdmins  SystemAdmins
+	CurrentBackupConfig  BackupConfig
+	CurrentPipelineSize  = make(map[string]PipelineSize)
+)
+
 // Config holds resty.Client which could be used for interacting with GoCd and other information
 type Config struct {
-	client *resty.Client
-	logger log.Logger
+	client    *resty.Client
+	logger    log.Logger
+	otherCron string
+	diskCron  string
+	lock      sync.RWMutex
+	paths     []string
 }
 
 // NodesConfig holds information of all agent of GoCd
@@ -102,8 +117,13 @@ type BackupConfig struct {
 	Schedule       string `json:"schedule,omitempty"`
 }
 
+type PipelineSize struct {
+	Size float64
+	Type string
+}
+
 // NewConfig returns new instance of Config when invoked
-func NewConfig(baseURL, userName, passWord, loglevel string, caContent []byte, logger log.Logger) *Config {
+func NewConfig(baseURL, userName, passWord, loglevel, cron, diskCron string, caContent []byte, path []string, logger log.Logger) *Config {
 	newClient := resty.New()
 	if loglevel == "debug" {
 		newClient.SetDebug(true)
@@ -118,7 +138,11 @@ func NewConfig(baseURL, userName, passWord, loglevel string, caContent []byte, l
 		newClient.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	}
 	return &Config{
-		client: newClient,
-		logger: logger,
+		client:    newClient,
+		logger:    logger,
+		lock:      sync.RWMutex{},
+		otherCron: cron,
+		diskCron:  diskCron,
+		paths:     path,
 	}
 }
