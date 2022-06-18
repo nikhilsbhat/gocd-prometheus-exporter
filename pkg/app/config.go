@@ -5,25 +5,27 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/imdario/mergo"
 	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	GoCdBaseURL           string   `json:"gocd-base-url,omitempty" yaml:"gocd-base-url,omitempty"`
-	GoCdUserName          string   `json:"gocd-username,omitempty" yaml:"gocd-username,omitempty"`
-	GoCdPassword          string   `json:"gocd-password,omitempty" yaml:"gocd-password,omitempty"`
-	InsecureTLS           bool     `json:"insecure-tls,omitempty" yaml:"insecure-tls,omitempty"`
-	GoCdPipelinesPath     []string `json:"gocd-pipelines-path,omitempty" yaml:"gocd-pipelines-path,omitempty"`
-	GoCdPipelinesRootPath string   `json:"gocd-pipelines-root-path,omitempty" yaml:"gocd-pipelines-root-path,omitempty"`
-	CaPath                string   `json:"ca-path,omitempty" yaml:"ca-path,omitempty"`
-	Port                  int      `json:"port,omitempty" yaml:"port,omitempty"`
-	Endpoint              string   `json:"metric-endpoint,omitempty" yaml:"metric-endpoint,omitempty"`
-	LogLevel              string   `json:"log-level,omitempty" yaml:"log-level,omitempty"`
-	SkipMetrics           []string `json:"skip-metrics,omitempty" yaml:"skip-metrics,omitempty"`
-	APICron               string   `json:"api-cron-schedule,omitempty" yaml:"api-cron-schedule,omitempty"`
-	DiskCron              string   `json:"disk-cron,omitempty" yaml:"disk-cron,omitempty"`
+	GoCdBaseURL           string        `json:"gocd-base-url,omitempty" yaml:"gocd-base-url,omitempty"`
+	GoCdUserName          string        `json:"gocd-username,omitempty" yaml:"gocd-username,omitempty"`
+	GoCdPassword          string        `json:"gocd-password,omitempty" yaml:"gocd-password,omitempty"`
+	InsecureTLS           bool          `json:"insecure-tls,omitempty" yaml:"insecure-tls,omitempty"`
+	GoCdPipelinesPath     []string      `json:"gocd-pipelines-path,omitempty" yaml:"gocd-pipelines-path,omitempty"`
+	GoCdPipelinesRootPath string        `json:"gocd-pipelines-root-path,omitempty" yaml:"gocd-pipelines-root-path,omitempty"`
+	CaPath                string        `json:"ca-path,omitempty" yaml:"ca-path,omitempty"`
+	Port                  int           `json:"port,omitempty" yaml:"port,omitempty"`
+	Endpoint              string        `json:"metric-endpoint,omitempty" yaml:"metric-endpoint,omitempty"`
+	LogLevel              string        `json:"log-level,omitempty" yaml:"log-level,omitempty"`
+	SkipMetrics           []string      `json:"skip-metrics,omitempty" yaml:"skip-metrics,omitempty"`
+	APICron               string        `json:"api-cron-schedule,omitempty" yaml:"api-cron-schedule,omitempty"`
+	DiskCron              string        `json:"disk-cron,omitempty" yaml:"disk-cron,omitempty"`
+	AppGraceDuration      time.Duration `json:"grace-duration,omitempty" yaml:"grace-duration,omitempty"`
 }
 
 func GetConfig(conf Config, path string) (*Config, error) {

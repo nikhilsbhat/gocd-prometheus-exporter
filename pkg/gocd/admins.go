@@ -17,7 +17,7 @@ func (conf *Config) GetAdminsInfo() (SystemAdmins, error) {
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionTwo,
 	})
-	level.Debug(conf.logger).Log(common.LogCategoryMsg, "trying to retrieve admins information present in GoCd") //nolint:errcheck
+	level.Debug(conf.logger).Log(common.LogCategoryMsg, getTryMessages("admins")) //nolint:errcheck
 
 	var adminsConf SystemAdmins
 	resp, err := conf.client.R().SetResult(&adminsConf).Get(common.GoCdSystemAdminEndpoint)
@@ -28,17 +28,17 @@ func (conf *Config) GetAdminsInfo() (SystemAdmins, error) {
 		return SystemAdmins{}, fmt.Errorf(fmt.Sprintf(common.GoCdReturnErrorMessage, resp.StatusCode()))
 	}
 
-	level.Debug(conf.logger).Log(common.LogCategoryMsg, "successfully retrieved information of admins information from GoCd") //nolint:errcheck
+	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("admins")) //nolint:errcheck
 	defer conf.lock.Unlock()
 	return adminsConf, nil
 }
 
 func (conf *Config) configureAdminsInfo() {
 	scheduleGetAdmins := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetAdmins.AddFunc(conf.otherCron, func() {
+	_, err := scheduleGetAdmins.AddFunc(conf.apiCron, func() {
 		admins, err := conf.GetAdminsInfo()
 		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving system admin information errored with: %s", err.Error())) //nolint:errcheck
+			level.Error(conf.logger).Log(common.LogCategoryErr, getAPIErrMsg("system admin", err.Error())) //nolint:errcheck
 		}
 		CurrentSystemAdmins = admins
 	})

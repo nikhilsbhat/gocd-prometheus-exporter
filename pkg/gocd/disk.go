@@ -26,7 +26,7 @@ func (conf *Config) GetDiskSize(path string) (float64, string, error) {
 		if err != nil {
 			return 0, "", err
 		}
-		level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("path %s is link to %s so fetching size of destination", path, originPath)) //nolint:errcheck
+		level.Debug(conf.logger).Log(common.LogCategoryMsg, getLinkMessage(path, originPath)) //nolint:errcheck
 		path = originPath
 	}
 

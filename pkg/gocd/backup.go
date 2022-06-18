@@ -17,7 +17,7 @@ func (conf *Config) GetBackupInfo() (BackupConfig, error) {
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
-	level.Debug(conf.logger).Log(common.LogCategoryMsg, "trying to retrieve backup configurations present in GoCd") //nolint:errcheck
+	level.Debug(conf.logger).Log(common.LogCategoryMsg, getTryMessages("backup")) //nolint:errcheck
 
 	var backUpConf BackupConfig
 	resp, err := conf.client.R().SetResult(&backUpConf).Get(common.GoCdBackupConfigEndpoint)
@@ -28,17 +28,17 @@ func (conf *Config) GetBackupInfo() (BackupConfig, error) {
 		return BackupConfig{}, fmt.Errorf(fmt.Sprintf(common.GoCdReturnErrorMessage, resp.StatusCode()))
 	}
 
-	level.Debug(conf.logger).Log(common.LogCategoryMsg, "successfully retrieved information of backup configurations in GoCd") //nolint:errcheck
+	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("backup")) //nolint:errcheck
 	defer conf.lock.Unlock()
 	return backUpConf, nil
 }
 
 func (conf *Config) configureGetBackupInfo() {
 	scheduleGetBackupInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetBackupInfo.AddFunc(conf.otherCron, func() {
+	_, err := scheduleGetBackupInfo.AddFunc(conf.apiCron, func() {
 		backupInfo, err := conf.GetBackupInfo()
 		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, fmt.Sprintf("retrieving backup information errored with: %s", err.Error())) //nolint:errcheck
+			level.Error(conf.logger).Log(common.LogCategoryErr, getAPIErrMsg("gocd backup", err.Error())) //nolint:errcheck
 		}
 		CurrentBackupConfig = backupInfo
 	})

@@ -192,6 +192,7 @@ func goCdExport(context *cli.Context) error {
 		SkipMetrics:           context.StringSlice(flagSkipMetrics),
 		APICron:               context.String(flagAPICronSchedule),
 		DiskCron:              context.String(flagDiskCronSchedule),
+		AppGraceDuration:      context.Duration(flagGraceDuration),
 	}
 
 	finalConfig, err := app.GetConfig(config, context.String(flagConfigPath))
@@ -211,7 +212,7 @@ func goCdExport(context *cli.Context) error {
 	if len(finalConfig.CaPath) != 0 {
 		ca, err := ioutil.ReadFile(finalConfig.CaPath)
 		if err != nil {
-			level.Error(logger).Log(common.LogCategoryErr, fmt.Sprintf("an error occurred while reading CA file: %s", finalConfig.CaPath)) //nolint:errcheck
+			level.Error(logger).Log(common.LogCategoryErr, getCAErrMsg(finalConfig.CaPath)) //nolint:errcheck
 		}
 		caContent = ca
 	}
@@ -241,9 +242,9 @@ func goCdExport(context *cli.Context) error {
 	// listens to terminate signal
 	go func() {
 		sig := <-sigChan
-		level.Info(logger).Log("msg", fmt.Sprintf("caught signal %v: terminating in %v", sig, context.Duration(flagGraceDuration))) //nolint:errcheck
+		level.Info(logger).Log("msg", fmt.Sprintf("caught signal %v: terminating in %v", sig, finalConfig.AppGraceDuration)) //nolint:errcheck
 		time.Sleep(context.Duration(flagGraceDuration))
-		level.Info(logger).Log("msg", fmt.Sprintf("terminate gocd-prometheus-exporter running on port: %d", finalConfig.Port)) //nolint:errcheck
+		level.Info(logger).Log("msg", getAppTerminationMsg(finalConfig.Port)) //nolint:errcheck
 		os.Exit(0)
 	}()
 
