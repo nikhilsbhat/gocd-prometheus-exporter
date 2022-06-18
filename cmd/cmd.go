@@ -39,7 +39,11 @@ const (
 	flagConfigPath       = "config-file"
 	flagSkipMetrics      = "skip-metrics"
 	flagDiskCronSchedule = "disk-cron-schedule"
-	flagApiCronSchedule  = "api-cron-schedule"
+	flagAPICronSchedule  = "api-cron-schedule"
+)
+
+const (
+	defaultAppPort = 8090
 )
 
 var (
@@ -99,7 +103,7 @@ func registerFlags() []cli.Flag {
 		&cli.IntFlag{
 			Name:    flagExporterPort,
 			Usage:   "port on which the metrics to be exposed",
-			Value:   8090,
+			Value:   defaultAppPort,
 			Aliases: []string{"p"},
 		},
 		&cli.StringFlag{
@@ -154,7 +158,7 @@ func registerFlags() []cli.Flag {
 			Aliases: []string{"sk"},
 		},
 		&cli.StringFlag{
-			Name: flagApiCronSchedule,
+			Name: flagAPICronSchedule,
 			Usage: `cron expression to schedule the metric collection.
                     		- 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
                       			and stores the latest values in memory.
@@ -186,7 +190,7 @@ func goCdExport(context *cli.Context) error {
 		Endpoint:              context.String(flagExporterEndpoint),
 		LogLevel:              context.String(flagLogLevel),
 		SkipMetrics:           context.StringSlice(flagSkipMetrics),
-		ApiCron:               context.String(flagApiCronSchedule),
+		APICron:               context.String(flagAPICronSchedule),
 		DiskCron:              context.String(flagDiskCronSchedule),
 	}
 
@@ -207,7 +211,7 @@ func goCdExport(context *cli.Context) error {
 	if len(finalConfig.CaPath) != 0 {
 		ca, err := ioutil.ReadFile(finalConfig.CaPath)
 		if err != nil {
-			level.Error(logger).Log(common.LogCategoryErr, fmt.Sprintf("an error occured while reading CA file: %s", finalConfig.CaPath)) //nolint:errcheck
+			level.Error(logger).Log(common.LogCategoryErr, fmt.Sprintf("an error occurred while reading CA file: %s", finalConfig.CaPath)) //nolint:errcheck
 		}
 		caContent = ca
 	}
@@ -221,7 +225,7 @@ func goCdExport(context *cli.Context) error {
 		finalConfig.GoCdUserName,
 		finalConfig.GoCdPassword,
 		finalConfig.LogLevel,
-		finalConfig.ApiCron,
+		finalConfig.APICron,
 		finalConfig.DiskCron,
 		caContent,
 		pipelinePaths,

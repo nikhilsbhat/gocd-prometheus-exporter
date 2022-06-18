@@ -37,7 +37,7 @@ func diskSize(path string) float64 {
 	var dirSize int64 = 0
 
 	sizes := make(chan int64)
-	readSize := func(path string, file os.FileInfo, err error) error {
+	readSize := func(path string, file os.FileInfo, err error) error { //nolint:unparam
 		if err != nil || file == nil {
 			return err
 		}

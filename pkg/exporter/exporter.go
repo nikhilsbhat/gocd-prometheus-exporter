@@ -8,11 +8,10 @@ import (
 
 	"github.com/thoas/go-funk"
 
-	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
+func (e *Exporter) collect(ch chan<- prometheus.Metric) {
 	// fetching server health status
 	if !funk.Contains(e.skipMetrics, common.MetricServerHealth) {
 		for _, health := range gocd.CurrentServerHealth {
@@ -66,7 +65,9 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 		if len(gocd.CurrentBackupConfig.Schedule) != 0 {
 			enabled = 1.0
 		}
-		e.backupConfigured.WithLabelValues(strconv.FormatBool(gocd.CurrentBackupConfig.EmailOnSuccess), strconv.FormatBool(gocd.CurrentBackupConfig.EmailOnFailure)).Set(enabled)
+		e.backupConfigured.WithLabelValues(
+			strconv.FormatBool(gocd.CurrentBackupConfig.EmailOnSuccess),
+			strconv.FormatBool(gocd.CurrentBackupConfig.EmailOnFailure)).Set(enabled)
 		e.backupConfigured.Collect(ch)
 	}
 
@@ -77,8 +78,6 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 		}
 		e.pipelinesDiskUsage.Collect(ch)
 	}
-
-	return nil
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
@@ -96,9 +95,5 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	e.mutex.Lock() // To protect metrics from concurrent collects.
 	defer e.mutex.Unlock()
-	if err := e.collect(ch); err != nil {
-		level.Error(e.logger).Log(common.LogCategoryErr, "Error scraping GoCd:", "err", err) //nolint:errcheck
-		e.scrapeFailures.Inc()
-		e.scrapeFailures.Collect(ch)
-	}
+	e.collect(ch)
 }

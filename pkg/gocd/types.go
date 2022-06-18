@@ -132,10 +132,10 @@ func NewConfig(baseURL, userName, passWord, loglevel, cron, diskCron string, caC
 	if len(caContent) != 0 {
 		certPool := x509.NewCertPool()
 		certPool.AppendCertsFromPEM(caContent)
-		newClient.SetTLSClientConfig(&tls.Config{RootCAs: certPool})
+		newClient.SetTLSClientConfig(&tls.Config{RootCAs: certPool}) //nolint:gosec
 		newClient.SetBasicAuth(userName, passWord)
 	} else {
-		newClient.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+		newClient.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) //nolint:gosec
 	}
 	return &Config{
 		client:    newClient,

@@ -22,7 +22,7 @@ type Config struct {
 	Endpoint              string   `json:"metric-endpoint,omitempty" yaml:"metric-endpoint,omitempty"`
 	LogLevel              string   `json:"log-level,omitempty" yaml:"log-level,omitempty"`
 	SkipMetrics           []string `json:"skip-metrics,omitempty" yaml:"skip-metrics,omitempty"`
-	ApiCron               string   `json:"api-cron-schedule,omitempty" yaml:"api-cron-schedule,omitempty"`
+	APICron               string   `json:"api-cron-schedule,omitempty" yaml:"api-cron-schedule,omitempty"`
 	DiskCron              string   `json:"disk-cron,omitempty" yaml:"disk-cron,omitempty"`
 }
 

@@ -13,7 +13,6 @@ type Exporter struct {
 	mutex              sync.Mutex
 	logger             log.Logger
 	skipMetrics        []string
-	scrapeFailures     prometheus.Counter
 	agentsCount        *prometheus.GaugeVec
 	agentDisk          *prometheus.GaugeVec
 	pipelinesDiskUsage *prometheus.GaugeVec
