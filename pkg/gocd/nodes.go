@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
+
 	"github.com/robfig/cron/v3"
 
 	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // GetNodesInfo implements method that fetches the details of all the agents present in GoCd server

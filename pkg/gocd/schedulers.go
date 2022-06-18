@@ -3,8 +3,9 @@ package gocd
 import (
 	"fmt"
 
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
+
 	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // ScheDulers schedules all the jobs so that data will be available for the exporter to serve

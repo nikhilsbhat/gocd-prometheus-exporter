@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
+
 	"github.com/robfig/cron/v3"
 
 	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // GetAdminsInfo fetches information of all system admins present in GoCd server.

@@ -11,10 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/app"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/exporter"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/gocd"
+
 	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/exporter"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/gocd"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -23,21 +25,21 @@ import (
 )
 
 const (
-	flagPipelinePath      = "pipeline-path"
-	flagPipelinePathRoot  = "pipeline-root-path"
-	flagLogLevel          = "log-level"
-	flagExporterPort      = "port"
-	flagExporterEndpoint  = "endpoint"
-	flagGoCdBaseURL       = "goCd-server-url"
-	flagGoCdUsername      = "goCd-username"
-	flagGoCdPassword      = "goCd-password"
-	flagInsecureTLS       = "insecure-tls"
-	flagCaPath            = "ca-path"
-	flagGraceDuration     = "grace-duration"
-	flagConfigPath        = "config-file"
-	flagSkipMetrics       = "skip-metrics"
-	flagDiskCronSchedule  = "disk-cron-schedule"
-	flagOtherCronSchedule = "cron-schedule"
+	flagPipelinePath     = "pipeline-path"
+	flagPipelinePathRoot = "pipeline-root-path"
+	flagLogLevel         = "log-level"
+	flagExporterPort     = "port"
+	flagExporterEndpoint = "endpoint"
+	flagGoCdBaseURL      = "goCd-server-url"
+	flagGoCdUsername     = "goCd-username"
+	flagGoCdPassword     = "goCd-password"
+	flagInsecureTLS      = "insecure-tls"
+	flagCaPath           = "ca-path"
+	flagGraceDuration    = "grace-duration"
+	flagConfigPath       = "config-file"
+	flagSkipMetrics      = "skip-metrics"
+	flagDiskCronSchedule = "disk-cron-schedule"
+	flagApiCronSchedule  = "api-cron-schedule"
 )
 
 var (
@@ -152,7 +154,7 @@ func registerFlags() []cli.Flag {
 			Aliases: []string{"sk"},
 		},
 		&cli.StringFlag{
-			Name: flagOtherCronSchedule,
+			Name: flagApiCronSchedule,
 			Usage: `cron expression to schedule the metric collection.
                     		- 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
                       			and stores the latest values in memory.
@@ -172,7 +174,7 @@ func registerFlags() []cli.Flag {
 }
 
 func goCdExport(context *cli.Context) error {
-	config := exporter.Config{
+	config := app.Config{
 		GoCdBaseURL:           context.String(flagGoCdBaseURL),
 		GoCdUserName:          context.String(flagGoCdUsername),
 		GoCdPassword:          context.String(flagGoCdPassword),
@@ -184,11 +186,11 @@ func goCdExport(context *cli.Context) error {
 		Endpoint:              context.String(flagExporterEndpoint),
 		LogLevel:              context.String(flagLogLevel),
 		SkipMetrics:           context.StringSlice(flagSkipMetrics),
-		OtherCron:             context.String(flagOtherCronSchedule),
+		ApiCron:               context.String(flagApiCronSchedule),
 		DiskCron:              context.String(flagDiskCronSchedule),
 	}
 
-	finalConfig, err := exporter.GetConfig(config, context.String(flagConfigPath))
+	finalConfig, err := app.GetConfig(config, context.String(flagConfigPath))
 	if err != nil {
 		log.Println(err)
 	}
@@ -219,7 +221,7 @@ func goCdExport(context *cli.Context) error {
 		finalConfig.GoCdUserName,
 		finalConfig.GoCdPassword,
 		finalConfig.LogLevel,
-		finalConfig.OtherCron,
+		finalConfig.ApiCron,
 		finalConfig.DiskCron,
 		caContent,
 		pipelinePaths,

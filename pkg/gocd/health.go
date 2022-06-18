@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
+
 	"github.com/robfig/cron/v3"
 
 	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 )
 
 // GetHealthInfo implements method that fetches the details of all warning and errors

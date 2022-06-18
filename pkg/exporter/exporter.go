@@ -3,12 +3,12 @@ package exporter
 import (
 	"strconv"
 
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/gocd"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/gocd"
 
 	"github.com/thoas/go-funk"
 
 	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/common"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
