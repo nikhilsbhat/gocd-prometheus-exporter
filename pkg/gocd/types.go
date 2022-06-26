@@ -1,23 +1,28 @@
 package gocd
 
-import (
-	"crypto/tls"
-	"crypto/x509"
-	"sync"
-	"time"
-
-	"github.com/go-kit/log"
-	"github.com/go-resty/resty/v2"
-)
-
 var (
-	CurrentNodeConfig    []Node
-	CurrentServerHealth  []ServerHealth
-	CurrentConfigRepos   []ConfigRepo
+	// CurrentAgentsConfig holds updated GoCD agent config information.
+	CurrentAgentsConfig []Agent
+	// CurrentAgentJobRunHistory holds updated GoCD agent config information.
+	CurrentAgentJobRunHistory = make([]AgentJobHistory, 0)
+	// CurrentServerHealth holds updated GoCD server health information.
+	CurrentServerHealth []ServerHealth
+	// CurrentConfigRepos holds updated config repo information present GoCD server.
+	CurrentConfigRepos []ConfigRepo
+	// CurrentPipelineGroup holds updated pipeline group information present GoCD server.
 	CurrentPipelineGroup []PipelineGroup
-	CurrentSystemAdmins  SystemAdmins
-	CurrentBackupConfig  BackupConfig
-	CurrentPipelineSize  = make(map[string]PipelineSize)
+	// CurrentEnvironments holds updated environment information present GoCD server.
+	CurrentEnvironments []Environment
+	// CurrentPipelineCount holds updated pipeline count present in GoCD server.
+	CurrentPipelineCount int
+	// CurrentSystemAdmins holds updated information of the system admins present in GoCD server.
+	CurrentSystemAdmins SystemAdmins
+	// CurrentBackupConfig holds updated information of backups configured in GoCD server.
+	CurrentBackupConfig BackupConfig
+	// CurrentVersion holds updated GoCD server version information.
+	CurrentVersion VersionInfo
+	// CurrentPipelineSize holds updated information of disk sizes occupied by various GoCD pipelines.
+	CurrentPipelineSize = make(map[string]PipelineSize)
 )
 
 const (
@@ -25,28 +30,18 @@ const (
 	defaultRetryWaitTime = 5
 )
 
-// Config holds resty.Client which could be used for interacting with GoCd and other information
-type Config struct {
-	client   *resty.Client
-	logger   log.Logger
-	apiCron  string
-	diskCron string
-	lock     sync.RWMutex
-	paths    []string
+// AgentsConfig holds information of all agent of GoCD.
+type AgentsConfig struct {
+	Config Agents `json:"_embedded,omitempty"`
 }
 
-// NodesConfig holds information of all agent of GoCd
-type NodesConfig struct {
-	Config Nodes `json:"_embedded,omitempty"`
+// Agents holds information of all agent of GoCD.
+type Agents struct {
+	Config []Agent `json:"agents,omitempty"`
 }
 
-// Nodes holds information of all agent of GoCd
-type Nodes struct {
-	Config []Node `json:"agents,omitempty"`
-}
-
-// Node holds information of a particular agent
-type Node struct {
+// Agent holds information of a particular agent.
+type Agent struct {
 	Name               string      `json:"hostname,omitempty"`
 	ID                 string      `json:"uuid,omitempty"`
 	Version            string      `json:"agent_version,omitempty"`
@@ -57,7 +52,7 @@ type Node struct {
 	DiskSpaceAvailable interface{} `json:"free_space,omitempty"`
 }
 
-// ServerVersion holds version information GoCd server
+// ServerVersion holds version information GoCd server.
 type ServerVersion struct {
 	Version     string `json:"version,omitempty"`
 	GitSha      string `json:"git_sha,omitempty"`
@@ -65,23 +60,23 @@ type ServerVersion struct {
 	CommitURL   string `json:"commit_url,omitempty"`
 }
 
-// ServerHealth holds information of GoCd server health
+// ServerHealth holds information of GoCD server health.
 type ServerHealth struct {
 	Level   string `json:"level,omitempty"`
 	Message string `json:"message,omitempty"`
 }
 
-// ConfigRepoConfig holds information of all config-repos present in GoCd
+// ConfigRepoConfig holds information of all config-repos present in GoCD.
 type ConfigRepoConfig struct {
 	ConfigRepos ConfigRepos `json:"_embedded,omitempty"`
 }
 
-// ConfigRepos holds information of all config-repos present in GoCd
+// ConfigRepos holds information of all config-repos present in GoCD.
 type ConfigRepos struct {
 	ConfigRepos []ConfigRepo `json:"config_repos,omitempty"`
 }
 
-// ConfigRepo holds information of the specified config-repo
+// ConfigRepo holds information of the specified config-repo.
 type ConfigRepo struct {
 	ID       string `json:"config_repos,omitempty"`
 	Material struct {
@@ -94,14 +89,17 @@ type ConfigRepo struct {
 	}
 }
 
+// PipelineGroupsConfig holds information on the various pipeline groups present in GoCD.
 type PipelineGroupsConfig struct {
 	PipelineGroups PipelineGroups `json:"_embedded,omitempty"`
 }
 
+// PipelineGroups holds information on the various pipeline groups present in GoCD.
 type PipelineGroups struct {
 	PipelineGroups []PipelineGroup `json:"groups,omitempty"`
 }
 
+// PipelineGroup holds information of a specific pipeline group instance.
 type PipelineGroup struct {
 	Name          string `json:"name,omitempty"`
 	PipelineCount int    `json:"pipeline_count,omitempty"`
@@ -110,47 +108,77 @@ type PipelineGroup struct {
 	}
 }
 
-// SystemAdmins holds information of the system admins present
+// SystemAdmins holds information of the system admins present.
 type SystemAdmins struct {
 	Roles []string `json:"roles,omitempty"`
 	Users []string `json:"users,omitempty"`
 }
 
-// BackupConfig holds information of the backup configured
+// BackupConfig holds information of the backup configured.
 type BackupConfig struct {
 	EmailOnSuccess bool   `json:"email_on_success,omitempty"`
 	EmailOnFailure bool   `json:"email_on_failure,omitempty"`
 	Schedule       string `json:"schedule,omitempty"`
 }
 
+// PipelineSize holds information of the pipeline size.
 type PipelineSize struct {
 	Size float64
 	Type string
 }
 
-// NewConfig returns new instance of Config when invoked
-func NewConfig(baseURL, userName, passWord, loglevel, cron, diskCron string, caContent []byte, path []string, logger log.Logger) *Config {
-	newClient := resty.New()
-	newClient.SetRetryCount(defaultRetryCount)
-	newClient.SetRetryWaitTime(defaultRetryWaitTime * time.Second)
-	if loglevel == "debug" {
-		newClient.SetDebug(true)
-	}
-	newClient.SetBaseURL(baseURL)
-	if len(caContent) != 0 {
-		certPool := x509.NewCertPool()
-		certPool.AppendCertsFromPEM(caContent)
-		newClient.SetTLSClientConfig(&tls.Config{RootCAs: certPool}) //nolint:gosec
-		newClient.SetBasicAuth(userName, passWord)
-	} else {
-		newClient.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true}) //nolint:gosec
-	}
-	return &Config{
-		client:   newClient,
-		logger:   logger,
-		lock:     sync.RWMutex{},
-		apiCron:  cron,
-		diskCron: diskCron,
-		paths:    path,
-	}
+// Pipelines holds information of the pipelines present in GoCD.
+type Pipelines struct {
+	Pipelines []Pipeline `json:"pipelines,omitempty"`
+}
+
+// Pipeline holds information of a specific pipeline instance.
+type Pipeline struct {
+	Name string `json:"name,omitempty"`
+}
+
+// EnvironmentInfo holds information of all environments present in GoCD.
+type EnvironmentInfo struct {
+	Environments Environments `json:"_embedded,omitempty"`
+}
+
+// Environments holds information of all environments present in GoCD.
+type Environments struct {
+	Environments []Environment `json:"environments,omitempty"`
+}
+
+// Environment holds information of a specific environment present in GoCD.
+type Environment struct {
+	Name      string     `json:"name,omitempty"`
+	Pipelines []Pipeline `json:"pipelines,omitempty"`
+}
+
+// VersionInfo holds version information of GoCD server.
+type VersionInfo struct {
+	Version     string `json:"version,omitempty"`
+	FullVersion string `json:"full_version,omitempty"`
+	GitSHA      string `json:"git_sha,omitempty"`
+}
+
+// AgentJobHistory holds information of pipeline run history of all GoCD agents.
+type AgentJobHistory struct {
+	Jobs       []JobRunHistory `json:"jobs,omitempty"`
+	Pagination Pagination      `json:"pagination"`
+}
+
+// JobRunHistory holds information of pipeline run history of a specific GoCD agent.
+type JobRunHistory struct {
+	Name            string `json:"pipeline_name,omitempty"`
+	JobName         string `json:"job_name,omitempty"`
+	StageName       string `json:"stage_name,omitempty"`
+	StageCounter    int64  `json:"stage_counter,string,omitempty"`
+	PipelineCounter int64  `json:"pipeline_counter,omitempty"`
+	Result          string `json:"result,omitempty"`
+}
+
+// Pagination holds information which is helpful in paginating the results of job run history.
+type Pagination struct {
+	PageSize int64 `json:"page_size,omitempty"`
+	Offset   int64 `json:"offset,omitempty"`
+	Total    int64 `json:"total,omitempty"`
 }

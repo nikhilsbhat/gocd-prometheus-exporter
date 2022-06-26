@@ -11,8 +11,11 @@ import (
 	"github.com/go-kit/log/level"
 )
 
-// GetPipelineGroupInfo fetches information of backup configured in GoCd server.
-func (conf *Config) GetPipelineGroupInfo() ([]PipelineGroup, error) {
+func (conf *client) GetPipelineInfo() {
+}
+
+// GetPipelineGroupInfo fetches information of backup configured in GoCD server.
+func (conf *client) GetPipelineGroupInfo() ([]PipelineGroup, error) {
 	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
@@ -22,10 +25,10 @@ func (conf *Config) GetPipelineGroupInfo() ([]PipelineGroup, error) {
 	var groupConf PipelineGroupsConfig
 	resp, err := conf.client.R().SetResult(&groupConf).Get(common.GoCdPipelineGroupEndpoint)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("call made to get pipeline group information errored with %w", err)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return nil, fmt.Errorf(fmt.Sprintf(common.GoCdReturnErrorMessage, resp.StatusCode()))
+		return nil, apiWithCodeError(resp.StatusCode())
 	}
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("pipeline groups")) //nolint:errcheck
 
@@ -38,19 +41,30 @@ func (conf *Config) GetPipelineGroupInfo() ([]PipelineGroup, error) {
 	}
 
 	conf.lock.Unlock()
+
 	return updatedGroupConf, nil
 }
 
-func (conf *Config) configureGetPipelineGroupInfo() {
+func (conf *client) getPipelineCount(groups []PipelineGroup) int {
+	var pipelines int
+	for _, i := range groups {
+		pipelines += i.PipelineCount
+	}
+
+	return pipelines
+}
+
+func (conf *client) configureGetPipelineGroupInfo() {
 	scheduleGetPipelineGroupInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleGetPipelineGroupInfo.AddFunc(conf.apiCron, func() {
 		pipelineInfo, err := conf.GetPipelineGroupInfo()
 		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, getAPIErrMsg("pipeline group", err.Error())) //nolint:errcheck
+			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("pipeline group", err.Error())) //nolint:errcheck
 		}
+
+		CurrentPipelineCount = conf.getPipelineCount(pipelineInfo)
 		CurrentPipelineGroup = pipelineInfo
 	})
-
 	if err != nil {
 		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
 	}

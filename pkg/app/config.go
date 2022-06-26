@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Config holds the information of the app gocd-prometheus-exporter.
 type Config struct {
 	GoCdBaseURL           string        `json:"gocd-base-url,omitempty" yaml:"gocd-base-url,omitempty"`
 	GoCdUserName          string        `json:"gocd-username,omitempty" yaml:"gocd-username,omitempty"`
@@ -28,26 +30,32 @@ type Config struct {
 	AppGraceDuration      time.Duration `json:"grace-duration,omitempty" yaml:"grace-duration,omitempty"`
 }
 
+// GetConfig returns the new instance of Config.
 func GetConfig(conf Config, path string) (*Config, error) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		log.Printf("config file %s not found, dropping configurations from file", path)
-		return &conf, err
+
+		return &conf, fmt.Errorf("fetching config file information failed with: %w", err)
 	}
 
 	fileOUT, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println("failed to read the config file, dropping configurations from file")
-		return &conf, err
+
+		return &conf, fmt.Errorf("reading config file errored with: %w", err)
 	}
 
 	var newConfig Config
 	if err = yaml.Unmarshal(fileOUT, &newConfig); err != nil {
 		log.Println("failed to unmarshall configurations, dropping configurations from file")
-		return &conf, err
+
+		return &conf, fmt.Errorf("parsing config file errored with: %w", err)
 	}
 	if err = mergo.Merge(&newConfig, &conf, mergo.WithOverride); err != nil {
 		log.Println("failed to merge configurations, dropping configurations from file")
-		return &conf, err
+
+		return &conf, fmt.Errorf("merging config errored with: %w", err)
 	}
+
 	return &newConfig, nil
 }

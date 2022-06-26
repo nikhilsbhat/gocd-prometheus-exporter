@@ -20,8 +20,12 @@ type Exporter struct {
 	serverHealth       *prometheus.GaugeVec
 	configRepoCount    *prometheus.GaugeVec
 	pipelineGroupCount *prometheus.GaugeVec
+	pipelineCount      *prometheus.GaugeVec
 	backupConfigured   *prometheus.GaugeVec
 	adminCount         *prometheus.GaugeVec
+	environmentCount   *prometheus.GaugeVec
+	versionInfo        *prometheus.GaugeVec
+	jobStatus          *prometheus.GaugeVec
 }
 
 func NewExporter(logger log.Logger, skipMetrics []string) *Exporter {
@@ -31,54 +35,74 @@ func NewExporter(logger log.Logger, skipMetrics []string) *Exporter {
 		agentsCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricAgentsCount,
-			Help:      "number of GoCd agents",
+			Help:      "number of GoCD agents",
 		}, []string{"agents_count"},
 		),
 		agentDisk: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricAgentDiskSpace,
-			Help:      "information of GoCd agent's disk space availability",
+			Help:      "information of GoCD agent's disk space availability",
 		}, []string{"name", "id", "version", "os", "sandbox"},
 		),
 		agentDown: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricAgentDown,
-			Help:      "latest information on GoCd agent's state",
+			Help:      "latest information on GoCD agent's state",
 		}, []string{"name", "id", "version", "os", "sandbox", "state"},
 		),
 		pipelinesDiskUsage: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricPipelineSize,
-			Help:      "disk size that GoCd pipeline have occupied in bytes",
+			Help:      "disk size that GoCD pipeline have occupied in bytes",
 		}, []string{"pipeline_path", "type"},
 		),
 		serverHealth: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricServerHealth,
-			Help:      "errors and warning ini GoCd server",
+			Help:      "errors and warning present in GoCD",
 		}, []string{"type", "message"},
 		),
 		configRepoCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricConfigRepoCount,
-			Help:      "number of config repos",
+			Help:      "number of config repos present in GoCD",
 		}, []string{"repos"},
 		),
 		adminCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricSystemAdminsCount,
-			Help:      "number users who are admins in gocd",
+			Help:      "number users who are admins in GoCD",
 		}, []string{"users"},
 		),
 		backupConfigured: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricConfiguredBackup,
 			Help:      "would be 1 if backup is enabled",
-		}, []string{"success_email", "failure_email"}),
+		}, []string{"success_email", "failure_email", "scheduled"}),
 		pipelineGroupCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,
 			Name:      common.MetricPipelineGroupCount,
-			Help:      "number of pipeline groups",
+			Help:      "number of pipeline groups present in GoCD",
 		}, []string{"pipeline_groups"}),
+		pipelineCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricPipelineCount,
+			Help:      "total number of pipeline present in GoCD",
+		}, []string{"pipeline_count"}),
+		environmentCount: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricEnvironmentCountAll,
+			Help:      "total number of environment present in GoCD",
+		}, []string{"environment_count"}),
+		versionInfo: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricVersion,
+			Help:      "GoCD server version",
+		}, []string{"version", "git_sha", "full_version"}),
+		jobStatus: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricJobStatus,
+			Help:      "GoCD pipeline status",
+		}, []string{"name", "job", "stage", "state"}),
 	}
 }

@@ -61,7 +61,7 @@ const (
 	defaultGraceDuration = 5
 )
 
-// App returns the cli for gocd-prometheus-exporter
+// App returns the cli for gocd-prometheus-exporter.
 func App() *cli.App {
 	return &cli.App{
 		Name:                 "gocd-prometheus-exporter",
@@ -204,7 +204,7 @@ func goCdExport(context *cli.Context) error {
 
 	promLogConfig := &promlog.Config{Level: &promlog.AllowedLevel{}, Format: &promlog.AllowedFormat{}}
 	if err := promLogConfig.Level.Set(finalConfig.LogLevel); err != nil {
-		return err
+		return fmt.Errorf("configuring logger errored with: %w", err)
 	}
 	logger := promlog.New(promLogConfig)
 
@@ -221,7 +221,7 @@ func goCdExport(context *cli.Context) error {
 	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesRootPath)
 	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesPath...)
 
-	client := gocd.NewConfig(
+	client := gocd.NewClient(
 		finalConfig.GoCdBaseURL,
 		finalConfig.GoCdUserName,
 		finalConfig.GoCdPassword,
@@ -234,7 +234,7 @@ func goCdExport(context *cli.Context) error {
 	)
 
 	// running schedules
-	client.ScheDulers()
+	client.CronSchedulers()
 
 	goCdExporter := exporter.NewExporter(logger, finalConfig.SkipMetrics)
 	prometheus.MustRegister(goCdExporter)
@@ -256,8 +256,9 @@ func goCdExport(context *cli.Context) error {
 	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", finalConfig.Endpoint)) //nolint:errcheck
 	http.Handle(finalConfig.Endpoint, promhttp.Handler())
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", finalConfig.Port), nil); err != nil {
-		return err
+		return fmt.Errorf("starting server on specified port failed with: %w", err)
 	}
+
 	return nil
 }
 

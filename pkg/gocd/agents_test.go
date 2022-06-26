@@ -4,13 +4,12 @@ import (
 	"testing"
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/gocd"
-
 	"github.com/prometheus/common/promlog"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConfig_GetBackupInfo(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+func Test_client_GetAgentJobRunHistory(t *testing.T) {
+	t.Run("should be able to fetch the agent job run history", func(t *testing.T) {
 		logger := promlog.New(&promlog.Config{}) //nolint:exhaustivestruct
 		client := gocd.NewClient(
 			"http://localhost:8153/go",
@@ -24,8 +23,10 @@ func TestConfig_GetBackupInfo(t *testing.T) {
 			logger,
 		)
 
-		backup, err := client.GetBackupInfo()
+		gocd.CurrentAgentsConfig = []gocd.Agent{{ID: "6132c45f-9818-42c9-9bd1-154132bd265f"}}
+		history, err := client.GetAgentJobRunHistory()
 		assert.NoError(t, err)
-		assert.Equal(t, 0, len(backup.Schedule))
+		assert.Equal(t, "Passed", history[0].Jobs[0].Result)
+		assert.Equal(t, "", history)
 	})
 }

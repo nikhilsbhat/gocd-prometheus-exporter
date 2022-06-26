@@ -11,8 +11,8 @@ import (
 	"github.com/go-kit/log/level"
 )
 
-// GetBackupInfo fetches information of backup configured in GoCd server.
-func (conf *Config) GetBackupInfo() (BackupConfig, error) {
+// GetBackupInfo fetches information of backup configured in GoCD server.
+func (conf *client) GetBackupInfo() (BackupConfig, error) {
 	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
@@ -22,27 +22,27 @@ func (conf *Config) GetBackupInfo() (BackupConfig, error) {
 	var backUpConf BackupConfig
 	resp, err := conf.client.R().SetResult(&backUpConf).Get(common.GoCdBackupConfigEndpoint)
 	if err != nil {
-		return BackupConfig{}, err
+		return BackupConfig{}, fmt.Errorf("call made to get backup information errored with %w", err)
 	}
 	if resp.StatusCode() != http.StatusOK {
-		return BackupConfig{}, fmt.Errorf(fmt.Sprintf(common.GoCdReturnErrorMessage, resp.StatusCode()))
+		return BackupConfig{}, apiWithCodeError(resp.StatusCode())
 	}
 
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("backup")) //nolint:errcheck
 	defer conf.lock.Unlock()
+
 	return backUpConf, nil
 }
 
-func (conf *Config) configureGetBackupInfo() {
+func (conf *client) configureGetBackupInfo() {
 	scheduleGetBackupInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleGetBackupInfo.AddFunc(conf.apiCron, func() {
 		backupInfo, err := conf.GetBackupInfo()
 		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, getAPIErrMsg("gocd backup", err.Error())) //nolint:errcheck
+			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("gocd backup", err.Error())) //nolint:errcheck
 		}
 		CurrentBackupConfig = backupInfo
 	})
-
 	if err != nil {
 		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
 	}

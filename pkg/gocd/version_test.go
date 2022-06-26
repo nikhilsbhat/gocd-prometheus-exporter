@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConfig_GetBackupInfo(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+func Test_config_GetVersionInfo(t *testing.T) {
+	t.Run("should be able to fetch the version info", func(t *testing.T) {
 		logger := promlog.New(&promlog.Config{}) //nolint:exhaustivestruct
 		client := gocd.NewClient(
 			"http://localhost:8153/go",
@@ -23,9 +23,8 @@ func TestConfig_GetBackupInfo(t *testing.T) {
 			nil,
 			logger,
 		)
-
-		backup, err := client.GetBackupInfo()
+		actual, err := client.GetVersionInfo()
 		assert.NoError(t, err)
-		assert.Equal(t, 0, len(backup.Schedule))
+		assert.Equal(t, gocd.VersionInfo{}, actual)
 	})
 }

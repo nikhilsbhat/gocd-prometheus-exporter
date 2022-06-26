@@ -11,12 +11,12 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-// GetDiskSize retrieves size of the specified path along with type, it would be link if path is symlink
-func (conf *Config) GetDiskSize(path string) (float64, string, error) {
+// GetDiskSize retrieves size of the specified path along with type, it would be link if path is symlink.
+func (conf *client) GetDiskSize(path string) (float64, string, error) {
 	var pathType string
 	fileInfo, err := os.Lstat(path)
 	if err != nil {
-		return 0, "", fmt.Errorf(fmt.Sprintf("stating path %s failed with error %s", path, err.Error()))
+		return 0, "", fmt.Errorf("stating path %s failed with error %w", path, err) //nolint:goerr113
 	}
 
 	pathType = common.TypeDir
@@ -24,7 +24,7 @@ func (conf *Config) GetDiskSize(path string) (float64, string, error) {
 		pathType = common.TypeLink
 		originPath, err := os.Readlink(path)
 		if err != nil {
-			return 0, "", err
+			return 0, "", fmt.Errorf("reading link errored with: %w", err)
 		}
 		level.Debug(conf.logger).Log(common.LogCategoryMsg, getLinkMessage(path, originPath)) //nolint:errcheck
 		path = originPath
@@ -34,7 +34,7 @@ func (conf *Config) GetDiskSize(path string) (float64, string, error) {
 }
 
 func diskSize(path string) float64 {
-	var dirSize int64 = 0
+	var dirSize int64
 
 	sizes := make(chan int64)
 	readSize := func(path string, file os.FileInfo, err error) error { //nolint:unparam
@@ -45,6 +45,7 @@ func diskSize(path string) float64 {
 		if !file.IsDir() {
 			sizes <- file.Size()
 		}
+
 		return nil
 	}
 
@@ -62,17 +63,16 @@ func diskSize(path string) float64 {
 	return sizeMB
 }
 
-func (conf *Config) configureDiskUsage() {
+func (conf *client) configureDiskUsage() {
 	scheduleDiskUsage := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleDiskUsage.AddFunc(conf.diskCron, conf.getAndUpdateDiskSize)
-
 	if err != nil {
 		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
 	}
 	scheduleDiskUsage.Start()
 }
 
-func (conf *Config) getAndUpdateDiskSize() {
+func (conf *client) getAndUpdateDiskSize() {
 	conf.lock.Lock()
 	for _, path := range conf.paths {
 		level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("pipeline present at %s would be scanned", path)) //nolint:errcheck
