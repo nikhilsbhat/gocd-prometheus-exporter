@@ -3,3 +3,5 @@ gocd-pipelines-path:
   - /path/to/pipeline/directory1
   - /path/to/pipeline/directory2
   - /path/to/pipeline/directory3
+metric-cron:
+  agent_down: "@every 60s"

@@ -38,7 +38,7 @@ func (conf *client) GetVersionInfo() (VersionInfo, error) {
 
 func (conf *client) configureGetVersionInfo() {
 	scheduleGetVersionInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetVersionInfo.AddFunc(conf.apiCron, func() {
+	_, err := scheduleGetVersionInfo.AddFunc(conf.getCron(common.MetricVersion), func() {
 		version, err := conf.GetVersionInfo()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("version", err.Error())) //nolint:errcheck

@@ -21,6 +21,7 @@ func Test_config_GetVersionInfo(t *testing.T) {
 			"",
 			nil,
 			nil,
+			nil,
 			logger,
 		)
 		actual, err := client.GetVersionInfo()

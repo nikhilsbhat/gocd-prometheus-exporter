@@ -36,7 +36,7 @@ func (conf *client) GetHealthInfo() ([]ServerHealth, error) {
 
 func (conf *client) configureGetHealthInfo() {
 	scheduleGetHealthInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetHealthInfo.AddFunc(conf.apiCron, func() {
+	_, err := scheduleGetHealthInfo.AddFunc(conf.getCron(common.MetricServerHealth), func() {
 		healthInfo, err := conf.GetHealthInfo()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("server health", err.Error())) //nolint:errcheck

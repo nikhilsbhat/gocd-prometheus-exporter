@@ -70,7 +70,7 @@ func (conf *client) GetAgentJobRunHistory() ([]AgentJobHistory, error) {
 
 func (conf *client) configureGetAgentsInfo() {
 	scheduleGetAgentsInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetAgentsInfo.AddFunc(conf.apiCron, func() {
+	_, err := scheduleGetAgentsInfo.AddFunc(conf.getCron(common.MetricAgentDown), func() {
 		agentsInfo, err := conf.GetAgentsInfo()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
@@ -85,7 +85,7 @@ func (conf *client) configureGetAgentsInfo() {
 
 func (conf *client) configureGetAgentJobRunHistory() {
 	scheduleGetAgentJobRunHistory := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetAgentJobRunHistory.AddFunc(conf.apiCron, func() {
+	_, err := scheduleGetAgentJobRunHistory.AddFunc(conf.getCron(common.MetricJobStatus), func() {
 		agentsJobRunHistory, err := conf.GetAgentJobRunHistory()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck

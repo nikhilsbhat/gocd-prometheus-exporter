@@ -34,7 +34,7 @@ func (conf *client) GetEnvironmentInfo() ([]Environment, error) {
 
 func (conf *client) configureGetEnvironmentInfo() {
 	scheduleGetEnvironmentInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetEnvironmentInfo.AddFunc(conf.apiCron, func() {
+	_, err := scheduleGetEnvironmentInfo.AddFunc(conf.getCron(common.MetricEnvironmentCountAll), func() {
 		environmentInfo, err := conf.GetEnvironmentInfo()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("environment", err.Error())) //nolint:errcheck

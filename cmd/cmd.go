@@ -200,7 +200,7 @@ func goCdExport(context *cli.Context) error {
 		log.Println(err)
 	}
 
-	signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGQUIT)
+	signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGQUIT) //nolint:govet
 
 	promLogConfig := &promlog.Config{Level: &promlog.AllowedLevel{}, Format: &promlog.AllowedFormat{}}
 	if err := promLogConfig.Level.Set(finalConfig.LogLevel); err != nil {
@@ -228,6 +228,7 @@ func goCdExport(context *cli.Context) error {
 		finalConfig.LogLevel,
 		finalConfig.APICron,
 		finalConfig.DiskCron,
+		finalConfig.MetricCron,
 		caContent,
 		pipelinePaths,
 		logger,

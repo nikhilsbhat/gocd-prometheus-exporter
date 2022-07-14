@@ -11,9 +11,6 @@ import (
 	"github.com/go-kit/log/level"
 )
 
-func (conf *client) GetPipelineInfo() {
-}
-
 // GetPipelineGroupInfo fetches information of backup configured in GoCD server.
 func (conf *client) GetPipelineGroupInfo() ([]PipelineGroup, error) {
 	conf.lock.Lock()
@@ -56,7 +53,7 @@ func (conf *client) getPipelineCount(groups []PipelineGroup) int {
 
 func (conf *client) configureGetPipelineGroupInfo() {
 	scheduleGetPipelineGroupInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetPipelineGroupInfo.AddFunc(conf.apiCron, func() {
+	_, err := scheduleGetPipelineGroupInfo.AddFunc(conf.getCron(common.MetricPipelineGroupCount), func() {
 		pipelineInfo, err := conf.GetPipelineGroupInfo()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("pipeline group", err.Error())) //nolint:errcheck

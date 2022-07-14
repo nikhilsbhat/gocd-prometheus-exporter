@@ -8,8 +8,8 @@ import (
 
 // CronSchedulers schedules all the jobs so that data will be available for the exporter to serve.
 func (conf *client) CronSchedulers() {
-	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("api", conf.apiCron))   //nolint:errcheck
-	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("disk", conf.diskCron)) //nolint:errcheck
+	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("api", conf.defaultAPICron)) //nolint:errcheck
+	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("disk", conf.diskCron))      //nolint:errcheck
 	conf.configureDiskUsage()
 	conf.configureAdminsInfo()
 	conf.configureGetConfigRepo()

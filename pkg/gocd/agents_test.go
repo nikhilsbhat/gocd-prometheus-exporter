@@ -20,6 +20,7 @@ func Test_client_GetAgentJobRunHistory(t *testing.T) {
 			"",
 			nil,
 			nil,
+			nil,
 			logger,
 		)
 

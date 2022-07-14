@@ -36,7 +36,7 @@ func (conf *client) GetAdminsInfo() (SystemAdmins, error) {
 
 func (conf *client) configureAdminsInfo() {
 	scheduleGetAdmins := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetAdmins.AddFunc(conf.apiCron, func() {
+	_, err := scheduleGetAdmins.AddFunc(conf.getCron(common.MetricSystemAdminsCount), func() {
 		admins, err := conf.GetAdminsInfo()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("system admin", err.Error())) //nolint:errcheck

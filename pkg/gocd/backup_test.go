@@ -21,6 +21,7 @@ func TestConfig_GetBackupInfo(t *testing.T) {
 			"",
 			nil,
 			nil,
+			nil,
 			logger,
 		)
 
