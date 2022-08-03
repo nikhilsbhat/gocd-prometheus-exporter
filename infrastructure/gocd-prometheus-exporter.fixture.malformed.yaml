@@ -1,0 +1,16 @@
+---
+gocd-username: "testing"
+gocd-password: "password"
+gocd-pipelines-path:
+  - /path/to/pipeline/directory1
+  - /path/to/pipeline/directory2
+  - /path/to/pipeline/directory3
+log-level: debug
+port: 9995
+api-cron-schedule: "@every @2m"
+disk-cron-schedule: "@every @2m"
+metric-cron
+ agent_down: "@every 60s"
+skip-metrics:
+  - "backup_configured"
+  - "admin_count"

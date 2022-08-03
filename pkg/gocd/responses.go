@@ -5,10 +5,11 @@ import (
 )
 
 var (
-	goCdTryMessage     = `trying to retrieve %s information present in GoCD`
-	goCdSuccessMessage = `successfully retrieved information of %s from GoCD`
-	cronMessage        = `%s cron will be scheduled for %s as specified`
-	symlinkMessage     = `path %s is link to %s so fetching size of destination`
+	goCdTryMessage       = `trying to retrieve %s information present in GoCD`
+	goCdSuccessMessage   = `successfully retrieved information of %s from GoCD`
+	cronMessage          = `%s cron will be scheduled for %s as specified`
+	cronScheduledMessage = `%s cron got scheduled`
+	symlinkMessage       = `path %s is link to %s so fetching size of destination`
 )
 
 func apiError(component, errMsg string) error {
@@ -33,6 +34,10 @@ func getSuccessMessages(component string) string {
 
 func getCronMessages(component, schedule string) string {
 	return fmt.Sprintf(cronMessage, component, schedule)
+}
+
+func getCronScheduledMessage(component string) string {
+	return fmt.Sprintf(cronScheduledMessage, component)
 }
 
 func getLinkMessage(link, path string) string {

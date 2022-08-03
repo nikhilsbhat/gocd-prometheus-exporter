@@ -37,6 +37,8 @@ func (conf *client) GetBackupInfo() (BackupConfig, error) {
 func (conf *client) configureGetBackupInfo() {
 	scheduleGetBackupInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleGetBackupInfo.AddFunc(conf.getCron(common.MetricConfiguredBackup), func() {
+		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricConfiguredBackup)) //nolint:errcheck
+
 		backupInfo, err := conf.GetBackupInfo()
 		if err != nil {
 			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("gocd backup", err.Error())) //nolint:errcheck

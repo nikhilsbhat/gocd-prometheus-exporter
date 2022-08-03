@@ -26,7 +26,7 @@ type Config struct {
 	LogLevel              string            `json:"log-level,omitempty" yaml:"log-level,omitempty"`
 	SkipMetrics           []string          `json:"skip-metrics,omitempty" yaml:"skip-metrics,omitempty"`
 	APICron               string            `json:"api-cron-schedule,omitempty" yaml:"api-cron-schedule,omitempty"`
-	DiskCron              string            `json:"disk-cron,omitempty" yaml:"disk-cron,omitempty"`
+	DiskCron              string            `json:"disk-cron-schedule,omitempty" yaml:"disk-cron-schedule,omitempty"`
 	MetricCron            map[string]string `json:"metric-cron,omitempty" yaml:"metric-cron,omitempty"`
 	AppGraceDuration      time.Duration     `json:"grace-duration,omitempty" yaml:"grace-duration,omitempty"`
 }
@@ -52,7 +52,7 @@ func GetConfig(conf Config, path string) (*Config, error) {
 
 		return &conf, fmt.Errorf("parsing config file errored with: %w", err)
 	}
-	if err = mergo.Merge(&newConfig, &conf, mergo.WithOverride); err != nil {
+	if err = mergo.Merge(&newConfig, &conf); err != nil {
 		log.Println("failed to merge configurations, dropping configurations from file")
 
 		return &conf, fmt.Errorf("merging config errored with: %w", err)

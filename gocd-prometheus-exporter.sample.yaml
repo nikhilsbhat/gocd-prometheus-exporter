@@ -1,7 +1,17 @@
 ---
+gocd-username: "admin"
+gocd-password: "admin"
+log-level: info
+port: 9995
+api-cron-schedule: "@every 20s"
+disk-cron-schedule: "@every 20s"
+metric-cron:
+ agent_down: "@every 60s"
+metric-endpoint: "/new-metrics"
+skip-metrics:
+  - "backup_configured"
+  - "admin_count"
 gocd-pipelines-path:
   - /path/to/pipeline/directory1
   - /path/to/pipeline/directory2
   - /path/to/pipeline/directory3
-metric-cron:
-  agent_down: "@every 60s"

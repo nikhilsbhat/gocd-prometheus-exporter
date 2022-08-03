@@ -74,6 +74,7 @@ func (conf *client) configureDiskUsage() {
 
 func (conf *client) getAndUpdateDiskSize() {
 	conf.lock.Lock()
+	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage("pipeline size")) //nolint:errcheck
 	for _, path := range conf.paths {
 		level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("pipeline present at %s would be scanned", path)) //nolint:errcheck
 		size, pathType, err := conf.GetDiskSize(path)
