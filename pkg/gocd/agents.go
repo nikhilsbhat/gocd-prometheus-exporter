@@ -69,7 +69,7 @@ func (conf *client) GetAgentJobRunHistory() ([]AgentJobHistory, error) {
 }
 
 func (conf *client) configureGetAgentsInfo() {
-	scheduleGetAgentsInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	scheduleGetAgentsInfo := cron.New(cron.WithLogger(getCronLogger(common.MetricAgentDown)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleGetAgentsInfo.AddFunc(conf.getCron(common.MetricAgentDown), func() {
 		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricAgentDown)) //nolint:errcheck
 
@@ -86,7 +86,7 @@ func (conf *client) configureGetAgentsInfo() {
 }
 
 func (conf *client) configureGetAgentJobRunHistory() {
-	scheduleGetAgentJobRunHistory := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	scheduleGetAgentJobRunHistory := cron.New(cron.WithLogger(getCronLogger(common.MetricJobStatus)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleGetAgentJobRunHistory.AddFunc(conf.getCron(common.MetricJobStatus), func() {
 		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricJobStatus)) //nolint:errcheck
 

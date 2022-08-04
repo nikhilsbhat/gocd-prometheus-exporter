@@ -34,7 +34,7 @@ func (conf *client) GetConfigRepoInfo() ([]ConfigRepo, error) {
 }
 
 func (conf *client) configureGetConfigRepo() {
-	scheduleGetConfigRepo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	scheduleGetConfigRepo := cron.New(cron.WithLogger(getCronLogger(common.MetricConfigRepoCount)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleGetConfigRepo.AddFunc(conf.getCron(common.MetricConfigRepoCount), func() {
 		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricConfigRepoCount)) //nolint:errcheck
 

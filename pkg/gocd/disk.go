@@ -64,7 +64,7 @@ func diskSize(path string) float64 {
 }
 
 func (conf *client) configureDiskUsage() {
-	scheduleDiskUsage := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	scheduleDiskUsage := cron.New(cron.WithLogger(getCronLogger(common.MetricPipelineSize)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleDiskUsage.AddFunc(conf.diskCron, conf.getAndUpdateDiskSize)
 	if err != nil {
 		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck

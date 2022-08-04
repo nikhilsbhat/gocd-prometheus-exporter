@@ -231,6 +231,7 @@ func goCdExport(context *cli.Context) error {
 		finalConfig.MetricCron,
 		caContent,
 		pipelinePaths,
+		finalConfig.SkipMetrics,
 		logger,
 	)
 

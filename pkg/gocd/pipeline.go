@@ -52,7 +52,7 @@ func (conf *client) getPipelineCount(groups []PipelineGroup) int {
 }
 
 func (conf *client) configureGetPipelineGroupInfo() {
-	scheduleGetPipelineGroupInfo := cron.New(cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
+	scheduleGetPipelineGroupInfo := cron.New(cron.WithLogger(getCronLogger(common.MetricPipelineGroupCount)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 	_, err := scheduleGetPipelineGroupInfo.AddFunc(conf.getCron(common.MetricPipelineGroupCount), func() {
 		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricPipelineGroupCount)) //nolint:errcheck
 

@@ -10,6 +10,7 @@ var (
 	cronMessage          = `%s cron will be scheduled for %s as specified`
 	cronScheduledMessage = `%s cron got scheduled`
 	symlinkMessage       = `path %s is link to %s so fetching size of destination`
+	cronEnabled          = `cron is enabled for %s metric collection`
 )
 
 func apiError(component, errMsg string) error {
@@ -34,6 +35,10 @@ func getSuccessMessages(component string) string {
 
 func getCronMessages(component, schedule string) string {
 	return fmt.Sprintf(cronMessage, component, schedule)
+}
+
+func getCronEnbaled(component string) string {
+	return fmt.Sprintf(cronEnabled, component)
 }
 
 func getCronScheduledMessage(component string) string {

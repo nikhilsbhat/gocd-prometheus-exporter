@@ -1,17 +1,19 @@
 ---
 gocd-username: "admin"
 gocd-password: "admin"
-log-level: info
-port: 9995
+log-level: debug
+port: 8090
 api-cron-schedule: "@every 20s"
 disk-cron-schedule: "@every 20s"
 metric-cron:
  agent_down: "@every 60s"
-metric-endpoint: "/new-metrics"
+metric-endpoint: "/metrics"
 skip-metrics:
   - "backup_configured"
   - "admin_count"
+  - "pipeline_size"
 gocd-pipelines-path:
   - /path/to/pipeline/directory1
   - /path/to/pipeline/directory2
   - /path/to/pipeline/directory3
+  - /Users/nikhil.bhat/my-opensource/gocd-prometheus-exporter

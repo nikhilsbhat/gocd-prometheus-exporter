@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	defaultlog "log"
+	"os"
 	"sync"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-resty/resty/v2"
+	"github.com/robfig/cron/v3"
 )
 
 // client holds resty.Client which could be used for interacting with GoCD and other information.
@@ -23,6 +26,7 @@ type client struct {
 	metricSpecificCron map[string]string
 	lock               sync.RWMutex
 	paths              []string
+	skipMetrics        []string
 }
 
 // GoCd implements methods to get various information regarding GoCD.
@@ -44,7 +48,7 @@ type GoCd interface {
 func NewClient(baseURL, userName, passWord, loglevel, defaultAPICron, diskCron string,
 	metricSpecificCron map[string]string,
 	caContent []byte,
-	path []string,
+	path, skipMetrics []string,
 	logger log.Logger,
 ) GoCd {
 	newClient := resty.New()
@@ -71,6 +75,7 @@ func NewClient(baseURL, userName, passWord, loglevel, defaultAPICron, diskCron s
 		diskCron:           diskCron,
 		metricSpecificCron: metricSpecificCron,
 		paths:              path,
+		skipMetrics:        skipMetrics,
 	}
 }
 
@@ -83,4 +88,8 @@ func (conf *client) getCron(metric string) string {
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("metric %s would be using default cron", metric)) //nolint:errcheck
 
 	return conf.defaultAPICron
+}
+
+func getCronLogger(metric string) cron.Logger {
+	return cron.VerbosePrintfLogger(defaultlog.New(os.Stdout, fmt.Sprintf("%s: ", metric), defaultlog.LstdFlags))
 }
