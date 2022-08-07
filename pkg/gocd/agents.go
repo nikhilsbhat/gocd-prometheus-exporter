@@ -6,8 +6,6 @@ import (
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 
-	"github.com/robfig/cron/v3"
-
 	"github.com/go-kit/log/level"
 )
 
@@ -68,36 +66,22 @@ func (conf *client) GetAgentJobRunHistory() ([]AgentJobHistory, error) {
 	return jobHistory, nil
 }
 
-func (conf *client) configureGetAgentsInfo() {
-	scheduleGetAgentsInfo := cron.New(cron.WithLogger(getCronLogger(common.MetricAgentDown)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetAgentsInfo.AddFunc(conf.getCron(common.MetricAgentDown), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricAgentDown)) //nolint:errcheck
-
-		agentsInfo, err := conf.GetAgentsInfo()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
-		}
-		CurrentAgentsConfig = agentsInfo
-	})
+func (conf *client) updateAgentsInfo() {
+	agentsInfo, err := conf.GetAgentsInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
 	}
-	scheduleGetAgentsInfo.Start()
+	if err == nil {
+		CurrentAgentsConfig = agentsInfo
+	}
 }
 
-func (conf *client) configureGetAgentJobRunHistory() {
-	scheduleGetAgentJobRunHistory := cron.New(cron.WithLogger(getCronLogger(common.MetricJobStatus)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetAgentJobRunHistory.AddFunc(conf.getCron(common.MetricJobStatus), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricJobStatus)) //nolint:errcheck
-
-		agentsJobRunHistory, err := conf.GetAgentJobRunHistory()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
-		}
-		CurrentAgentJobRunHistory = agentsJobRunHistory
-	})
+func (conf *client) updateAgentJobRunHistory() {
+	agentsJobRunHistory, err := conf.GetAgentJobRunHistory()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
 	}
-	scheduleGetAgentJobRunHistory.Start()
+	if err == nil {
+		CurrentAgentJobRunHistory = agentsJobRunHistory
+	}
 }

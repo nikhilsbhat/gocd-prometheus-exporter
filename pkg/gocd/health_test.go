@@ -23,6 +23,7 @@ func TestConfig_GetHealthInfo(t *testing.T) {
 			nil,
 			nil,
 			nil,
+			nil,
 			logger,
 		)
 

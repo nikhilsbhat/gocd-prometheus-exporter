@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
-	"github.com/robfig/cron/v3"
 )
 
 // GetVersionInfo fetches version information of the GoCD to which it is connected to.
@@ -36,19 +35,12 @@ func (conf *client) GetVersionInfo() (VersionInfo, error) {
 	return version, nil
 }
 
-func (conf *client) configureGetVersionInfo() {
-	scheduleGetVersionInfo := cron.New(cron.WithLogger(getCronLogger(common.MetricVersion)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetVersionInfo.AddFunc(conf.getCron(common.MetricVersion), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricVersion)) //nolint:errcheck
-
-		version, err := conf.GetVersionInfo()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("version", err.Error())) //nolint:errcheck
-		}
-		CurrentVersion = version
-	})
+func (conf *client) updateVersionInfo() {
+	version, err := conf.GetVersionInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("version", err.Error())) //nolint:errcheck
 	}
-	scheduleGetVersionInfo.Start()
+	if err == nil {
+		CurrentVersion = version
+	}
 }

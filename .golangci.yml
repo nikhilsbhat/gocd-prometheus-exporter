@@ -31,7 +31,7 @@ linters-settings:
     lines: 100
 
   lll:
-    line-length: 145
+    line-length: 165
 
   dupl:
     threshold: 450

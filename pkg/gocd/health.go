@@ -6,8 +6,6 @@ import (
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 
-	"github.com/robfig/cron/v3"
-
 	"github.com/go-kit/log/level"
 )
 
@@ -34,19 +32,12 @@ func (conf *client) GetHealthInfo() ([]ServerHealth, error) {
 	return health, nil
 }
 
-func (conf *client) configureGetHealthInfo() {
-	scheduleGetHealthInfo := cron.New(cron.WithLogger(getCronLogger(common.MetricServerHealth)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetHealthInfo.AddFunc(conf.getCron(common.MetricServerHealth), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricServerHealth)) //nolint:errcheck
-
-		healthInfo, err := conf.GetHealthInfo()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("server health", err.Error())) //nolint:errcheck
-		}
-		CurrentServerHealth = healthInfo
-	})
+func (conf *client) updateHealthInfo() {
+	healthInfo, err := conf.GetHealthInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("server health", err.Error())) //nolint:errcheck
 	}
-	scheduleGetHealthInfo.Start()
+	if err == nil {
+		CurrentServerHealth = healthInfo
+	}
 }

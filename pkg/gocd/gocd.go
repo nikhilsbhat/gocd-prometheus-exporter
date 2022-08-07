@@ -4,8 +4,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	defaultlog "log"
-	"os"
 	"sync"
 	"time"
 
@@ -14,7 +12,6 @@ import (
 
 	"github.com/go-kit/log"
 	"github.com/go-resty/resty/v2"
-	"github.com/robfig/cron/v3"
 )
 
 // client holds resty.Client which could be used for interacting with GoCD and other information.
@@ -54,6 +51,9 @@ func NewClient(baseURL, userName, passWord, loglevel, defaultAPICron, diskCron s
 	newClient := resty.New()
 	newClient.SetRetryCount(defaultRetryCount)
 	newClient.SetRetryWaitTime(defaultRetryWaitTime * time.Second)
+	newClient.SetRetryAfter(func(client *resty.Client, resp *resty.Response) (time.Duration, error) {
+		return 0, fmt.Errorf("quota exceeded") //nolint:goerr113
+	})
 	if loglevel == "debug" {
 		newClient.SetDebug(true)
 	}
@@ -88,8 +88,4 @@ func (conf *client) getCron(metric string) string {
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("metric %s would be using default cron", metric)) //nolint:errcheck
 
 	return conf.defaultAPICron
-}
-
-func getCronLogger(metric string) cron.Logger {
-	return cron.VerbosePrintfLogger(defaultlog.New(os.Stdout, fmt.Sprintf("%s: ", metric), defaultlog.LstdFlags))
 }

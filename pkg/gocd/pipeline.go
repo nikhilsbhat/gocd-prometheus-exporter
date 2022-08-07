@@ -6,8 +6,6 @@ import (
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 
-	"github.com/robfig/cron/v3"
-
 	"github.com/go-kit/log/level"
 )
 
@@ -51,21 +49,13 @@ func (conf *client) getPipelineCount(groups []PipelineGroup) int {
 	return pipelines
 }
 
-func (conf *client) configureGetPipelineGroupInfo() {
-	scheduleGetPipelineGroupInfo := cron.New(cron.WithLogger(getCronLogger(common.MetricPipelineGroupCount)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetPipelineGroupInfo.AddFunc(conf.getCron(common.MetricPipelineGroupCount), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricPipelineGroupCount)) //nolint:errcheck
-
-		pipelineInfo, err := conf.GetPipelineGroupInfo()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("pipeline group", err.Error())) //nolint:errcheck
-		}
-
+func (conf *client) updatePipelineGroupInfo() {
+	pipelineInfo, err := conf.GetPipelineGroupInfo()
+	if err != nil {
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("pipeline group", err.Error())) //nolint:errcheck
+	}
+	if err == nil {
 		CurrentPipelineCount = conf.getPipelineCount(pipelineInfo)
 		CurrentPipelineGroup = pipelineInfo
-	})
-	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
 	}
-	scheduleGetPipelineGroupInfo.Start()
 }

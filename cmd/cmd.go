@@ -236,7 +236,9 @@ func goCdExport(context *cli.Context) error {
 	)
 
 	// running schedules
-	client.CronSchedulers()
+	go func() {
+		client.CronSchedulers()
+	}()
 
 	goCdExporter := exporter.NewExporter(logger, finalConfig.SkipMetrics)
 	prometheus.MustRegister(goCdExporter)

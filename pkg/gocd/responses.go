@@ -8,7 +8,8 @@ var (
 	goCdTryMessage       = `trying to retrieve %s information present in GoCD`
 	goCdSuccessMessage   = `successfully retrieved information of %s from GoCD`
 	cronMessage          = `%s cron will be scheduled for %s as specified`
-	cronScheduledMessage = `%s cron got scheduled`
+	cronScheduledMessage = `%d instance of %s cron got scheduled`
+	cronCompleteMessage  = `scheduled %d instance of %s cron was completed`
 	symlinkMessage       = `path %s is link to %s so fetching size of destination`
 	cronEnabled          = `cron is enabled for %s metric collection`
 )
@@ -41,8 +42,12 @@ func getCronEnbaled(component string) string {
 	return fmt.Sprintf(cronEnabled, component)
 }
 
-func getCronScheduledMessage(component string) string {
-	return fmt.Sprintf(cronScheduledMessage, component)
+func getCronScheduledMessage(component string, instance int) string {
+	return fmt.Sprintf(cronScheduledMessage, instance, component)
+}
+
+func getCronCompleteMessage(component string, instance int) string {
+	return fmt.Sprintf(cronCompleteMessage, instance, component)
 }
 
 func getLinkMessage(link, path string) string {

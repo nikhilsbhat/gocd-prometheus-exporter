@@ -6,8 +6,6 @@ import (
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 
-	"github.com/robfig/cron/v3"
-
 	"github.com/go-kit/log/level"
 )
 
@@ -34,20 +32,12 @@ func (conf *client) GetBackupInfo() (BackupConfig, error) {
 	return backUpConf, nil
 }
 
-func (conf *client) configureGetBackupInfo() {
-	scheduleGetBackupInfo := cron.New(cron.WithLogger(getCronLogger(common.MetricConfiguredBackup)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetBackupInfo.AddFunc(conf.getCron(common.MetricConfiguredBackup), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricConfiguredBackup)) //nolint:errcheck
-
-		backupInfo, err := conf.GetBackupInfo()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("gocd backup", err.Error())) //nolint:errcheck
-		}
-		CurrentBackupConfig = backupInfo
-	})
+func (conf *client) updateBackupInfo() {
+	backupInfo, err := conf.GetBackupInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("gocd backup", err.Error())) //nolint:errcheck
 	}
-
-	scheduleGetBackupInfo.Start()
+	if err == nil {
+		CurrentBackupConfig = backupInfo
+	}
 }

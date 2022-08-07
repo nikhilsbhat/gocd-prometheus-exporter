@@ -6,8 +6,6 @@ import (
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 
-	"github.com/robfig/cron/v3"
-
 	"github.com/go-kit/log/level"
 )
 
@@ -33,19 +31,12 @@ func (conf *client) GetConfigRepoInfo() ([]ConfigRepo, error) {
 	return reposConf.ConfigRepos.ConfigRepos, nil
 }
 
-func (conf *client) configureGetConfigRepo() {
-	scheduleGetConfigRepo := cron.New(cron.WithLogger(getCronLogger(common.MetricConfigRepoCount)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetConfigRepo.AddFunc(conf.getCron(common.MetricConfigRepoCount), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricConfigRepoCount)) //nolint:errcheck
-
-		repos, err := conf.GetConfigRepoInfo()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("config repo", err.Error())) //nolint:errcheck
-		}
-		CurrentConfigRepos = repos
-	})
+func (conf *client) updateConfigRepoInfo() {
+	repos, err := conf.GetConfigRepoInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("config repo", err.Error())) //nolint:errcheck
 	}
-	scheduleGetConfigRepo.Start()
+	if err == nil {
+		CurrentConfigRepos = repos
+	}
 }

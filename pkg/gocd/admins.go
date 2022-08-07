@@ -6,8 +6,6 @@ import (
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 
-	"github.com/robfig/cron/v3"
-
 	"github.com/go-kit/log/level"
 )
 
@@ -34,19 +32,12 @@ func (conf *client) GetAdminsInfo() (SystemAdmins, error) {
 	return adminsConf, nil
 }
 
-func (conf *client) configureAdminsInfo() {
-	scheduleGetAdmins := cron.New(cron.WithLogger(getCronLogger(common.MetricSystemAdminsCount)), cron.WithChain(cron.SkipIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
-	_, err := scheduleGetAdmins.AddFunc(conf.getCron(common.MetricSystemAdminsCount), func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(common.MetricSystemAdminsCount)) //nolint:errcheck
-
-		admins, err := conf.GetAdminsInfo()
-		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("system admin", err.Error())) //nolint:errcheck
-		}
-		CurrentSystemAdmins = admins
-	})
+func (conf *client) updateAdminsInfo() {
+	admins, err := conf.GetAdminsInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("system admin", err.Error())) //nolint:errcheck
 	}
-	scheduleGetAdmins.Start()
+	if err == nil {
+		CurrentSystemAdmins = admins
+	}
 }
