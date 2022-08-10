@@ -80,6 +80,9 @@ func NewClient(baseURL, userName, passWord, loglevel, defaultAPICron, diskCron s
 }
 
 func (conf *client) getCron(metric string) string {
+	if metric == common.MetricPipelineSize {
+		return conf.diskCron
+	}
 	if val, ok := conf.metricSpecificCron[metric]; ok {
 		level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("the cron for metric %s would be %s", metric, val)) //nolint:errcheck
 
@@ -88,4 +91,17 @@ func (conf *client) getCron(metric string) string {
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("metric %s would be using default cron", metric)) //nolint:errcheck
 
 	return conf.defaultAPICron
+}
+
+func (conf *client) getCronClient() *client {
+	return &client{
+		client:             conf.client,
+		logger:             conf.logger,
+		lock:               sync.RWMutex{},
+		defaultAPICron:     conf.defaultAPICron,
+		diskCron:           conf.diskCron,
+		metricSpecificCron: conf.metricSpecificCron,
+		paths:              conf.paths,
+		skipMetrics:        conf.skipMetrics,
+	}
 }

@@ -63,12 +63,13 @@ func diskSize(path string) float64 {
 }
 
 func (conf *client) updateDiskUsage() {
-	conf.lock.Lock()
-	for _, path := range conf.paths {
-		level.Debug(conf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("pipeline present at %s would be scanned", path)) //nolint:errcheck
-		size, pathType, err := conf.GetDiskSize(path)
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	for _, path := range newConf.paths {
+		level.Debug(newConf.logger).Log(common.LogCategoryMsg, fmt.Sprintf("pipeline present at %s would be scanned", path)) //nolint:errcheck
+		size, pathType, err := newConf.GetDiskSize(path)
 		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
+			level.Error(newConf.logger).Log(common.LogCategoryErr, err.Error()) //nolint:errcheck
 		}
 		if err == nil {
 			CurrentPipelineSize[path] = PipelineSize{
@@ -77,5 +78,5 @@ func (conf *client) updateDiskUsage() {
 			}
 		}
 	}
-	defer conf.lock.Unlock()
+	defer newConf.lock.Unlock()
 }

@@ -11,7 +11,6 @@ import (
 
 // GetPipelineGroupInfo fetches information of backup configured in GoCD server.
 func (conf *client) GetPipelineGroupInfo() ([]PipelineGroup, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
@@ -35,8 +34,6 @@ func (conf *client) GetPipelineGroupInfo() ([]PipelineGroup, error) {
 		})
 	}
 
-	conf.lock.Unlock()
-
 	return updatedGroupConf, nil
 }
 
@@ -50,12 +47,15 @@ func (conf *client) getPipelineCount(groups []PipelineGroup) int {
 }
 
 func (conf *client) updatePipelineGroupInfo() {
-	pipelineInfo, err := conf.GetPipelineGroupInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	pipelineInfo, err := newConf.GetPipelineGroupInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("pipeline group", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("pipeline group", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
-		CurrentPipelineCount = conf.getPipelineCount(pipelineInfo)
+		CurrentPipelineCount = newConf.getPipelineCount(pipelineInfo)
 		CurrentPipelineGroup = pipelineInfo
 	}
+	defer newConf.lock.Unlock()
 }

@@ -11,7 +11,6 @@ import (
 
 // GetAgentsInfo implements method that fetches the details of all the agents present in GoCD server.
 func (conf *client) GetAgentsInfo() ([]Agent, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionSeven,
 	})
@@ -26,14 +25,12 @@ func (conf *client) GetAgentsInfo() ([]Agent, error) {
 		return nil, apiWithCodeError(resp.StatusCode())
 	}
 
-	conf.lock.Unlock()
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("agents")) //nolint:errcheck
 
 	return agentsConf.Config.Config, nil
 }
 
 func (conf *client) GetAgentJobRunHistory() ([]AgentJobHistory, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
@@ -60,28 +57,33 @@ func (conf *client) GetAgentJobRunHistory() ([]AgentJobHistory, error) {
 		level.Debug(conf.logger).Log(common.LogCategoryMsg, "no history found") //nolint:errcheck
 	}
 
-	conf.lock.Unlock()
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("agent job run history")) //nolint:errcheck
 
 	return jobHistory, nil
 }
 
 func (conf *client) updateAgentsInfo() {
-	agentsInfo, err := conf.GetAgentsInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	agentsInfo, err := newConf.GetAgentsInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
 		CurrentAgentsConfig = agentsInfo
 	}
+	defer newConf.lock.Unlock()
 }
 
 func (conf *client) updateAgentJobRunHistory() {
-	agentsJobRunHistory, err := conf.GetAgentJobRunHistory()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	agentsJobRunHistory, err := newConf.GetAgentJobRunHistory()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
 		CurrentAgentJobRunHistory = agentsJobRunHistory
 	}
+	defer newConf.lock.Unlock()
 }

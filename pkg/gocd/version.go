@@ -11,7 +11,6 @@ import (
 
 // GetVersionInfo fetches version information of the GoCD to which it is connected to.
 func (conf *client) GetVersionInfo() (VersionInfo, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
@@ -30,17 +29,19 @@ func (conf *client) GetVersionInfo() (VersionInfo, error) {
 	}
 
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("version")) //nolint:errcheck
-	conf.lock.Unlock()
 
 	return version, nil
 }
 
 func (conf *client) updateVersionInfo() {
-	version, err := conf.GetVersionInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	version, err := newConf.GetVersionInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("version", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("version", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
 		CurrentVersion = version
 	}
+	defer newConf.lock.Unlock()
 }

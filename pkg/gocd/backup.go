@@ -11,7 +11,6 @@ import (
 
 // GetBackupInfo fetches information of backup configured in GoCD server.
 func (conf *client) GetBackupInfo() (BackupConfig, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
@@ -27,17 +26,19 @@ func (conf *client) GetBackupInfo() (BackupConfig, error) {
 	}
 
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("backup")) //nolint:errcheck
-	defer conf.lock.Unlock()
 
 	return backUpConf, nil
 }
 
 func (conf *client) updateBackupInfo() {
-	backupInfo, err := conf.GetBackupInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	backupInfo, err := newConf.GetBackupInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("gocd backup", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("gocd backup", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
 		CurrentBackupConfig = backupInfo
 	}
+	defer newConf.lock.Unlock()
 }

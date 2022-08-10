@@ -31,7 +31,7 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 		e.agentDown.Reset()
 		for _, node := range gocd.CurrentAgentsConfig {
 			if node.CurrentState == common.GoCdDisconnectedState {
-				e.agentDown.WithLabelValues(node.Name, node.ID, node.Version, node.OS, node.Sandbox, node.CurrentState).Set(1)
+				e.agentDown.WithLabelValues(node.Name, node.ID, node.Version, node.OS, node.Sandbox, node.CurrentState, node.ConfigState).Set(1)
 			}
 			if !funk.Contains(e.skipMetrics, common.MetricAgentDiskSpace) {
 				e.agentDisk.WithLabelValues(node.Name, node.ID, node.Version, node.OS, node.Sandbox).Set(common.Float(node.DiskSpaceAvailable))

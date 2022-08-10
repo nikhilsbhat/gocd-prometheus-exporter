@@ -11,7 +11,6 @@ import (
 
 // GetConfigRepoInfo fetches information of all config-repos in GoCD server.
 func (conf *client) GetConfigRepoInfo() ([]ConfigRepo, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionFour,
 	})
@@ -26,17 +25,19 @@ func (conf *client) GetConfigRepoInfo() ([]ConfigRepo, error) {
 		return nil, apiWithCodeError(resp.StatusCode())
 	}
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("config repos")) //nolint:errcheck
-	conf.lock.Unlock()
 
 	return reposConf.ConfigRepos.ConfigRepos, nil
 }
 
 func (conf *client) updateConfigRepoInfo() {
-	repos, err := conf.GetConfigRepoInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	repos, err := newConf.GetConfigRepoInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("config repo", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("config repo", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
 		CurrentConfigRepos = repos
 	}
+	defer newConf.lock.Unlock()
 }

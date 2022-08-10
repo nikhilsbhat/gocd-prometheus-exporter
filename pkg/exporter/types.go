@@ -48,7 +48,7 @@ func NewExporter(logger log.Logger, skipMetrics []string) *Exporter {
 			Namespace: common.Namespace,
 			Name:      common.MetricAgentDown,
 			Help:      "latest information on GoCD agent's state",
-		}, []string{"name", "id", "version", "os", "sandbox", "state"},
+		}, []string{"name", "id", "version", "os", "sandbox", "state", "config_state"},
 		),
 		pipelinesDiskUsage: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,

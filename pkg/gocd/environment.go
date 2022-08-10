@@ -10,7 +10,6 @@ import (
 
 // GetEnvironmentInfo fetches information of backup configured in GoCD server.
 func (conf *client) GetEnvironmentInfo() ([]Environment, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionThree,
 	})
@@ -26,18 +25,19 @@ func (conf *client) GetEnvironmentInfo() ([]Environment, error) {
 	}
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("environment")) //nolint:errcheck
 
-	conf.lock.Unlock()
-
 	return envConf.Environments.Environments, nil
 }
 
 func (conf *client) updateEnvironmentInfo() {
-	environmentInfo, err := conf.GetEnvironmentInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	environmentInfo, err := newConf.GetEnvironmentInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("environment", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("environment", err.Error())) //nolint:errcheck
 	}
 
 	if err == nil {
 		CurrentEnvironments = environmentInfo
 	}
+	defer newConf.lock.Unlock()
 }

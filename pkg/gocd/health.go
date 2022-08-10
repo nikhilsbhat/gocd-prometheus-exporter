@@ -11,7 +11,6 @@ import (
 
 // GetHealthInfo implements method that fetches the details of all warning and errors.
 func (conf *client) GetHealthInfo() ([]ServerHealth, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionOne,
 	})
@@ -27,17 +26,19 @@ func (conf *client) GetHealthInfo() ([]ServerHealth, error) {
 	}
 
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("health status")) //nolint:errcheck
-	conf.lock.Unlock()
 
 	return health, nil
 }
 
 func (conf *client) updateHealthInfo() {
-	healthInfo, err := conf.GetHealthInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	healthInfo, err := newConf.GetHealthInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("server health", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("server health", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
 		CurrentServerHealth = healthInfo
 	}
+	defer newConf.lock.Unlock()
 }

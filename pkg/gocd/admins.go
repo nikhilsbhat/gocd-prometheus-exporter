@@ -11,7 +11,6 @@ import (
 
 // GetAdminsInfo fetches information of all system admins present in GoCD server.
 func (conf *client) GetAdminsInfo() (SystemAdmins, error) {
-	conf.lock.Lock()
 	conf.client.SetHeaders(map[string]string{
 		"Accept": common.GoCdHeaderVersionTwo,
 	})
@@ -27,17 +26,19 @@ func (conf *client) GetAdminsInfo() (SystemAdmins, error) {
 	}
 
 	level.Debug(conf.logger).Log(common.LogCategoryMsg, getSuccessMessages("admins")) //nolint:errcheck
-	defer conf.lock.Unlock()
 
 	return adminsConf, nil
 }
 
 func (conf *client) updateAdminsInfo() {
-	admins, err := conf.GetAdminsInfo()
+	newConf := conf.getCronClient()
+	newConf.lock.Lock()
+	admins, err := newConf.GetAdminsInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("system admin", err.Error())) //nolint:errcheck
+		level.Error(newConf.logger).Log(common.LogCategoryErr, apiError("system admin", err.Error())) //nolint:errcheck
 	}
 	if err == nil {
 		CurrentSystemAdmins = admins
 	}
+	defer newConf.lock.Unlock()
 }

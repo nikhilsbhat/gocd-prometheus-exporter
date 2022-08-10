@@ -53,3 +53,12 @@ func getCronCompleteMessage(component string, instance int) string {
 func getLinkMessage(link, path string) string {
 	return fmt.Sprintf(symlinkMessage, link, path)
 }
+
+// func getTraceInfo(component string, request *resty.Request) string {
+//	out, err := json.Marshal(request.TraceInfo())
+//	if err != nil {
+//		log.Println(err)
+//		return ""
+//	}
+//	return fmt.Sprintf("%s: %s", component, string(out))
+// }
