@@ -3,6 +3,7 @@ module github.com/nikhilsbhat/gocd-prometheus-exporter
 go 1.17
 
 require (
+	github.com/basgys/goxml2json v1.1.0
 	github.com/go-co-op/gocron v1.16.2
 	github.com/go-kit/log v0.2.0
 	github.com/go-resty/resty/v2 v2.7.0
@@ -34,6 +35,7 @@ require (
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220502124256-b6088ccd6cba // indirect
+	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

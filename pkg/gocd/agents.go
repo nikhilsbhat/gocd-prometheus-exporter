@@ -42,8 +42,6 @@ func (conf *client) GetAgentJobRunHistory() ([]AgentJobHistory, error) {
 	for _, currentAgent := range CurrentAgentsConfig {
 		var jobHistoryConf AgentJobHistory
 		resp, err := conf.client.R().SetResult(&jobHistoryConf).Get(fmt.Sprintf(common.GoCdJobRunHistoryEndpoint, currentAgent.ID))
-		level.Debug(conf.logger).Log(common.LogCategoryMsg, resp.Request.URL) //nolint:errcheck
-
 		if err != nil {
 			return nil, fmt.Errorf("call made to get agent job run history errored with %w", err)
 		}

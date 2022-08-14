@@ -38,6 +38,8 @@ type GoCd interface {
 	GetEnvironmentInfo() ([]Environment, error)
 	GetVersionInfo() (VersionInfo, error)
 	GetBackupInfo() (BackupConfig, error)
+	GetPipelines() (PipelinesInfo, error)
+	GetPipelineState() ([]PipelineState, error)
 	CronSchedulers()
 }
 
@@ -51,9 +53,6 @@ func NewClient(baseURL, userName, passWord, loglevel, defaultAPICron, diskCron s
 	newClient := resty.New()
 	newClient.SetRetryCount(defaultRetryCount)
 	newClient.SetRetryWaitTime(defaultRetryWaitTime * time.Second)
-	newClient.SetRetryAfter(func(client *resty.Client, resp *resty.Response) (time.Duration, error) {
-		return 0, fmt.Errorf("quota exceeded") //nolint:goerr113
-	})
 	if loglevel == "debug" {
 		newClient.SetDebug(true)
 	}

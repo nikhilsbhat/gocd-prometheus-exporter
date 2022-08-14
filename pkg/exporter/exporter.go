@@ -118,6 +118,17 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 		}
 		e.jobStatus.Collect(channel)
 	}
+
+	if !funk.Contains(e.skipMetrics, common.MetricPipelineState) {
+		for _, pipelineState := range gocd.CurrentPipelineState {
+			e.pipelineState.WithLabelValues(pipelineState.Name,
+				strconv.FormatBool(pipelineState.Paused),
+				strconv.FormatBool(pipelineState.Locked),
+				strconv.FormatBool(pipelineState.Schedulable),
+				pipelineState.PausedBy)
+		}
+		e.pipelineState.Collect(channel)
+	}
 }
 
 func (e *Exporter) Describe(channel chan<- *prometheus.Desc) {
@@ -134,6 +145,7 @@ func (e *Exporter) Describe(channel chan<- *prometheus.Desc) {
 	e.environmentCount.Describe(channel)
 	e.versionInfo.Describe(channel)
 	e.jobStatus.Describe(channel)
+	e.pipelineState.Describe(channel)
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {

@@ -1,5 +1,7 @@
 package gocd
 
+import "encoding/xml"
+
 var (
 	// CurrentAgentsConfig holds updated GoCD agent config information.
 	CurrentAgentsConfig []Agent
@@ -23,6 +25,10 @@ var (
 	CurrentVersion VersionInfo
 	// CurrentPipelineSize holds updated information of disk sizes occupied by various GoCD pipelines.
 	CurrentPipelineSize = make(map[string]PipelineSize)
+	// CurrentPipelines holds updated list of pipeline names that are present in GoCD.
+	CurrentPipelines []string
+	// CurrentPipelineState holds the information of the latest state of pipelines available in GoCD.
+	CurrentPipelineState []PipelineState
 )
 
 const (
@@ -125,6 +131,26 @@ type BackupConfig struct {
 type PipelineSize struct {
 	Size float64
 	Type string
+}
+
+// PipelinesInfo holds information of list of pipelines.
+type PipelinesInfo struct {
+	XMLName xml.Name `xml:"pipelines"`
+	Link    struct {
+		Href string `xml:"href,attr"`
+	} `xml:"link"`
+	Pipeline []struct {
+		Href string `xml:"href,attr"`
+	} `xml:"pipeline"`
+}
+
+// PipelineState holds information of the latest state of pipeline.
+type PipelineState struct {
+	Name        string `json:"name,omitempty"`
+	Paused      bool   `json:"paused,omitempty"`
+	Locked      bool   `json:"locked,omitempty"`
+	Schedulable bool   `json:"schedulable,omitempty"`
+	PausedBy    string `json:"paused_by,omitempty"`
 }
 
 // Pipelines holds information of the pipelines present in GoCD.

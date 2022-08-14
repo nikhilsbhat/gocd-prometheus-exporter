@@ -66,7 +66,17 @@ func (conf *client) CronSchedulers() { //nolint:funlen
 		conf.schedule(scheduler, common.MetricJobStatus, conf.updateAgentJobRunHistory)
 	}
 
+	if !funk.Contains(conf.skipMetrics, common.MetricPipelines) {
+		conf.schedule(scheduler, common.MetricPipelines, conf.updatePipelines)
+	}
+
+	if !funk.Contains(conf.skipMetrics, common.MetricPipelineState) {
+		conf.schedule(scheduler, common.MetricPipelineState, conf.updatePipelineState)
+	}
+
+	scheduler.NextRun()
 	scheduler.StartAsync()
+	scheduler.SingletonMode()
 	scheduler.StartBlocking()
 	scheduler.SingletonModeAll()
 }
@@ -82,7 +92,6 @@ func (conf *client) schedule(scheduler *gocron.Scheduler, metric string, taskFun
 	}, func() {
 		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronCompleteMessage(metric, job.RunCount())) //nolint:errcheck
 	})
-	job.SingletonMode()
 
 	gocron.SetPanicHandler(func(jobName string, recoverData interface{}) {
 		fmt.Printf("job %s\n just panicked", jobName)

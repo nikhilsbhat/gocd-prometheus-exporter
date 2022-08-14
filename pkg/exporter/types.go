@@ -26,6 +26,7 @@ type Exporter struct {
 	environmentCount   *prometheus.GaugeVec
 	versionInfo        *prometheus.GaugeVec
 	jobStatus          *prometheus.GaugeVec
+	pipelineState      *prometheus.GaugeVec
 }
 
 func NewExporter(logger log.Logger, skipMetrics []string) *Exporter {
@@ -104,5 +105,10 @@ func NewExporter(logger log.Logger, skipMetrics []string) *Exporter {
 			Name:      common.MetricJobStatus,
 			Help:      "GoCD pipeline status",
 		}, []string{"name", "job", "stage", "state"}),
+		pipelineState: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricPipelineState,
+			Help:      "GoCD pipeline state",
+		}, []string{"name", "paused", "locked", "schedulable", "paused_by"}),
 	}
 }
