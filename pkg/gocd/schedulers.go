@@ -18,59 +18,54 @@ const (
 
 // CronSchedulers schedules all the jobs so that data will be available for the exporter to serve.
 func (conf *client) CronSchedulers() { //nolint:funlen
-	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("api", conf.defaultAPICron)) //nolint:errcheck
-	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("disk", conf.diskCron))      //nolint:errcheck
+	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("api", conf.config.APICron)) //nolint:errcheck
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	if !funk.Contains(conf.skipMetrics, common.MetricPipelineSize) {
-		conf.schedule(scheduler, common.MetricPipelineSize, conf.updateDiskUsage)
-	}
-
-	if !funk.Contains(conf.skipMetrics, common.MetricSystemAdminsCount) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricSystemAdminsCount) {
 		conf.schedule(scheduler, common.MetricSystemAdminsCount, conf.updateAdminsInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricConfigRepoCount) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricConfigRepoCount) {
 		conf.schedule(scheduler, common.MetricConfigRepoCount, conf.updateConfigRepoInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricConfiguredBackup) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricConfiguredBackup) {
 		conf.schedule(scheduler, common.MetricConfiguredBackup, conf.updateBackupInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricAgentDown) &&
-		!funk.Contains(conf.skipMetrics, common.MetricAgentDiskSpace) &&
-		!funk.Contains(conf.skipMetrics, common.MetricAgentsCount) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricAgentDown) &&
+		!funk.Contains(conf.config.SkipMetrics, common.MetricAgentDiskSpace) &&
+		!funk.Contains(conf.config.SkipMetrics, common.MetricAgentsCount) {
 		metricName := fmt.Sprintf("%s/%s/%s", common.MetricAgentDown, common.MetricAgentDiskSpace, common.MetricAgentsCount)
 		conf.schedule(scheduler, metricName, conf.updateAgentsInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricServerHealth) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricServerHealth) {
 		conf.schedule(scheduler, common.MetricServerHealth, conf.updateHealthInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricPipelineGroupCount) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricPipelineGroupCount) {
 		conf.schedule(scheduler, common.MetricPipelineGroupCount, conf.updatePipelineGroupInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricEnvironmentCountAll) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricEnvironmentCountAll) {
 		conf.schedule(scheduler, common.MetricEnvironmentCountAll, conf.updateEnvironmentInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricVersion) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricVersion) {
 		conf.schedule(scheduler, common.MetricVersion, conf.updateVersionInfo)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricJobStatus) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricJobStatus) {
 		conf.schedule(scheduler, common.MetricJobStatus, conf.updateAgentJobRunHistory)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricPipelines) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricPipelines) {
 		conf.schedule(scheduler, common.MetricPipelines, conf.updatePipelines)
 	}
 
-	if !funk.Contains(conf.skipMetrics, common.MetricPipelineState) {
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricPipelineState) {
 		conf.schedule(scheduler, common.MetricPipelineState, conf.updatePipelineState)
 	}
 

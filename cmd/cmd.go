@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -44,6 +43,7 @@ const (
 
 const (
 	defaultAppPort = 8090
+	defaultTimeout = 30
 )
 
 var (
@@ -203,37 +203,21 @@ func goCdExport(context *cli.Context) error {
 	signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGQUIT) //nolint:govet
 
 	promLogConfig := &promlog.Config{Level: &promlog.AllowedLevel{}, Format: &promlog.AllowedFormat{}}
-	if err := promLogConfig.Level.Set(finalConfig.LogLevel); err != nil {
+	if err = promLogConfig.Level.Set(finalConfig.LogLevel); err != nil {
 		return fmt.Errorf("configuring logger errored with: %w", err)
 	}
 	logger := promlog.New(promLogConfig)
 
 	var caContent []byte
 	if len(finalConfig.CaPath) != 0 {
-		ca, err := ioutil.ReadFile(finalConfig.CaPath)
+		ca, err := os.ReadFile(finalConfig.CaPath)
 		if err != nil {
 			level.Error(logger).Log(common.LogCategoryErr, getCAErrMsg(finalConfig.CaPath)) //nolint:errcheck
 		}
 		caContent = ca
 	}
 
-	pipelinePaths := make([]string, 0)
-	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesRootPath)
-	pipelinePaths = append(pipelinePaths, finalConfig.GoCdPipelinesPath...)
-
-	client := gocd.NewClient(
-		finalConfig.GoCdBaseURL,
-		finalConfig.GoCdUserName,
-		finalConfig.GoCdPassword,
-		finalConfig.LogLevel,
-		finalConfig.APICron,
-		finalConfig.DiskCron,
-		finalConfig.MetricCron,
-		caContent,
-		pipelinePaths,
-		finalConfig.SkipMetrics,
-		logger,
-	)
+	client := gocd.NewClient(*finalConfig, logger, caContent)
 
 	// running schedules
 	go func() {
@@ -258,8 +242,15 @@ func goCdExport(context *cli.Context) error {
 
 	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %d", finalConfig.Port))         //nolint:errcheck
 	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", finalConfig.Endpoint)) //nolint:errcheck
+
 	http.Handle(finalConfig.Endpoint, promhttp.Handler())
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", finalConfig.Port), nil); err != nil {
+
+	server := &http.Server{
+		Addr:              fmt.Sprintf(":%d", finalConfig.Port),
+		ReadHeaderTimeout: defaultTimeout * time.Second,
+	}
+
+	if err = server.ListenAndServe(); err != nil {
 		return fmt.Errorf("starting server on specified port failed with: %w", err)
 	}
 

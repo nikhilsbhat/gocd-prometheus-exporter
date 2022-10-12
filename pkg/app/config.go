@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -39,7 +38,7 @@ func GetConfig(conf Config, path string) (*Config, error) {
 		return &conf, fmt.Errorf("fetching config file information failed with: %w", err)
 	}
 
-	fileOUT, err := ioutil.ReadFile(path)
+	fileOUT, err := os.ReadFile(path)
 	if err != nil {
 		log.Println("failed to read the config file, dropping configurations from file")
 

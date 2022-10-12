@@ -15,7 +15,6 @@ type Exporter struct {
 	skipMetrics        []string
 	agentsCount        *prometheus.GaugeVec
 	agentDisk          *prometheus.GaugeVec
-	pipelinesDiskUsage *prometheus.GaugeVec
 	agentDown          *prometheus.GaugeVec
 	serverHealth       *prometheus.GaugeVec
 	configRepoCount    *prometheus.GaugeVec
@@ -50,12 +49,6 @@ func NewExporter(logger log.Logger, skipMetrics []string) *Exporter {
 			Name:      common.MetricAgentDown,
 			Help:      "latest information on GoCD agent's state",
 		}, []string{"name", "id", "version", "os", "sandbox", "state", "config_state"},
-		),
-		pipelinesDiskUsage: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Namespace: common.Namespace,
-			Name:      common.MetricPipelineSize,
-			Help:      "disk size that GoCD pipeline have occupied in bytes",
-		}, []string{"pipeline_path", "type"},
 		),
 		serverHealth: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: common.Namespace,

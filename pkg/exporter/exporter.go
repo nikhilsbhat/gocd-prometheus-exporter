@@ -8,6 +8,7 @@ import (
 
 	"github.com/thoas/go-funk"
 
+	goCD "github.com/nikhilsbhat/gocd-sdk-go"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -83,16 +84,8 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 		e.backupConfigured.Collect(channel)
 	}
 
-	// fetching pipeline sizes
-	if !funk.Contains(e.skipMetrics, common.MetricPipelineSize) {
-		for pipeline, pipelineInfo := range gocd.CurrentPipelineSize {
-			e.pipelinesDiskUsage.WithLabelValues(pipeline, pipelineInfo.Type).Set(pipelineInfo.Size)
-		}
-		e.pipelinesDiskUsage.Collect(channel)
-	}
-
 	if !funk.Contains(e.skipMetrics, common.MetricVersion) {
-		if (gocd.CurrentVersion == gocd.VersionInfo{}) {
+		if (gocd.CurrentVersion == goCD.VersionInfo{}) {
 			e.versionInfo.WithLabelValues("", "", "").Set(0)
 		} else {
 			e.versionInfo.WithLabelValues(gocd.CurrentVersion.Version, gocd.CurrentVersion.GitSHA, gocd.CurrentVersion.FullVersion).Set(1)
@@ -132,7 +125,6 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 }
 
 func (e *Exporter) Describe(channel chan<- *prometheus.Desc) {
-	e.pipelinesDiskUsage.Describe(channel)
 	e.agentsCount.Describe(channel)
 	e.agentDown.Describe(channel)
 	e.agentDisk.Describe(channel)
