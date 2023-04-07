@@ -4,6 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nikhilsbhat/gocd-prometheus-exporter)](https://goreportcard.com/report/github.com/nikhilsbhat/gocd-prometheus-exporter)
 [![shields](https://img.shields.io/badge/license-MIT-blue)](https://github.com/nikhilsbhat/gocd-prometheus-exporter/blob/master/LICENSE)
 [![shields](https://godoc.org/github.com/nikhilsbhat/gocd-prometheus-exporter?status.svg)](https://godoc.org/github.com/nikhilsbhat/gocd-prometheus-exporter)
+[![shields](https://img.shields.io/github/v/tag/nikhilsbhat/gocd-prometheus-exporter.svg)](https://github.com/nikhilsbhat/gocd-prometheus-exporter/tags)
 [![shields](https://img.shields.io/github/downloads/nikhilsbhat/gocd-prometheus-exporter/total.svg)](https://github.com/nikhilsbhat/gocd-prometheus-exporter/releases)
 
 
