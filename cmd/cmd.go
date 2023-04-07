@@ -32,6 +32,7 @@ const (
 	flagGoCdBaseURL      = "goCd-server-url"
 	flagGoCdUsername     = "goCd-username"
 	flagGoCdPassword     = "goCd-password"
+	flagGoCDBearerToken  = "goCd-bearer-token"
 	flagInsecureTLS      = "insecure-tls"
 	flagCaPath           = "ca-path"
 	flagGraceDuration    = "grace-duration"
@@ -129,6 +130,12 @@ func registerFlags() []cli.Flag {
 			Aliases: []string{"password"},
 			EnvVars: []string{"GOCD_PASSWORD"},
 		},
+		&cli.StringFlag{
+			Name:    flagGoCDBearerToken,
+			Usage:   "required bearer-token for establishing connection to GoCd server if auth enabled",
+			Aliases: []string{"token"},
+			EnvVars: []string{"GOCD_BEARER_TOKEN"},
+		},
 		&cli.BoolFlag{
 			Name:    flagInsecureTLS,
 			Usage:   "enable insecure TLS if you wish to connect to GOCD insecurily",
@@ -182,6 +189,7 @@ func goCdExport(context *cli.Context) error {
 		GoCdBaseURL:           context.String(flagGoCdBaseURL),
 		GoCdUserName:          context.String(flagGoCdUsername),
 		GoCdPassword:          context.String(flagGoCdPassword),
+		GoCDBearerToken:       context.String(flagGoCDBearerToken),
 		InsecureTLS:           context.Bool(flagInsecureTLS),
 		GoCdPipelinesPath:     context.StringSlice(flagPipelinePath),
 		GoCdPipelinesRootPath: context.String(flagPipelinePathRoot),

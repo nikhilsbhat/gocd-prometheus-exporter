@@ -16,6 +16,7 @@ type Config struct {
 	GoCdBaseURL           string            `json:"gocd-base-url,omitempty" yaml:"gocd-base-url,omitempty"`
 	GoCdUserName          string            `json:"gocd-username,omitempty" yaml:"gocd-username,omitempty"`
 	GoCdPassword          string            `json:"gocd-password,omitempty" yaml:"gocd-password,omitempty"`
+	GoCDBearerToken       string            `json:"go-cd-bearer-token,omitempty" yaml:"go-cd-bearer-token,omitempty"`
 	InsecureTLS           bool              `json:"insecure-tls,omitempty" yaml:"insecure-tls,omitempty"`
 	GoCdPipelinesPath     []string          `json:"gocd-pipelines-path,omitempty" yaml:"gocd-pipelines-path,omitempty"`
 	GoCdPipelinesRootPath string            `json:"gocd-pipelines-root-path,omitempty" yaml:"gocd-pipelines-root-path,omitempty"`

@@ -10,7 +10,7 @@ func (conf *client) updateBackupInfo() {
 	conf.lock.Lock()
 	client := conf.getCronClient()
 
-	backupInfo, err := client.GetBackupInfo()
+	backupInfo, err := client.GetBackupConfig()
 	if err != nil {
 		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("gocd backup", err.Error())) //nolint:errcheck
 	}

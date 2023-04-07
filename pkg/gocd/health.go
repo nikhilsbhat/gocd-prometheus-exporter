@@ -10,7 +10,7 @@ func (conf *client) updateHealthInfo() {
 	conf.lock.Lock()
 	client := conf.getCronClient()
 
-	healthInfo, err := client.GetHealthMessages()
+	healthInfo, err := client.GetServerHealthMessages()
 	if err != nil {
 		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("server health", err.Error())) //nolint:errcheck
 	}

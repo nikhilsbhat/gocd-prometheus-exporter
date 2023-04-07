@@ -49,10 +49,14 @@ func (conf *client) getCron(metric string) string {
 }
 
 func (conf *client) getCronClient() gocd.GoCd {
+	auth := gocd.Auth{
+		UserName:    conf.config.GoCdUserName,
+		Password:    conf.config.GoCdPassword,
+		BearerToken: conf.config.GoCDBearerToken,
+	}
 	return gocd.NewClient(
 		conf.config.GoCdBaseURL,
-		conf.config.GoCdUserName,
-		conf.config.GoCdPassword,
+		auth,
 		conf.config.LogLevel,
 		conf.caContent,
 	)
