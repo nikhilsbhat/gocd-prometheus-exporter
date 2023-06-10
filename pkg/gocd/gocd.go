@@ -54,6 +54,7 @@ func (conf *client) getCronClient() gocd.GoCd {
 		Password:    conf.config.GoCdPassword,
 		BearerToken: conf.config.GoCDBearerToken,
 	}
+
 	return gocd.NewClient(
 		conf.config.GoCdBaseURL,
 		auth,

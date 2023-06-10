@@ -115,6 +115,10 @@ gocd_pipeline_size{pipeline_path="",type="dir"} 0
 gocd_pipeline_size{pipeline_path="",type="link"} 0
 ```
 
+## Documentation
+
+Updated documentation on all available commands and flags can be found [here](https://github.com/nikhilsbhat/gocd-prometheus-exporter/blob/master/docs/doc/gocd_prometheus_exporter.md).
+
 ## TODO
 * [ ] Expose more metrics.
 * [ ] Increase test coverage.

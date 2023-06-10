@@ -10,12 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/app"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/exporter"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/gocd"
-
-	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -32,7 +31,7 @@ const (
 	flagGoCdBaseURL      = "goCd-server-url"
 	flagGoCdUsername     = "goCd-username"
 	flagGoCdPassword     = "goCd-password"
-	flagGoCDBearerToken  = "goCd-bearer-token"
+	flagGoCDBearerToken  = "goCd-bearer-token" //nolint:gosec
 	flagInsecureTLS      = "insecure-tls"
 	flagCaPath           = "ca-path"
 	flagGraceDuration    = "grace-duration"
@@ -70,6 +69,12 @@ func App() *cli.App {
 		UsageText:            "gocd-prometheus-exporter [flags]",
 		EnableBashCompletion: true,
 		HideHelp:             false,
+		Authors: []*cli.Author{
+			{
+				Name:  "Nikhil Bhat",
+				Email: "nikhilsbhat93@gmail.com",
+			},
+		},
 		Commands: []*cli.Command{
 			{
 				Name:    "version",

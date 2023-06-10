@@ -1,9 +1,8 @@
 package gocd
 
 import (
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
-
 	"github.com/go-kit/log/level"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 )
 
 func (conf *client) updateConfigRepoInfo() {

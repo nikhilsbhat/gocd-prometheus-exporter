@@ -3,9 +3,8 @@ package exporter
 import (
 	"sync"
 
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
-
 	"github.com/go-kit/log"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

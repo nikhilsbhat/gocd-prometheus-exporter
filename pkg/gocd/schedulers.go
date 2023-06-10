@@ -5,11 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
-	"github.com/thoas/go-funk"
-
 	"github.com/go-co-op/gocron"
 	"github.com/go-kit/log/level"
+	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
+	"github.com/thoas/go-funk"
 )
 
 const (

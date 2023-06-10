@@ -5,11 +5,9 @@ import (
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/gocd"
-
-	"github.com/thoas/go-funk"
-
 	goCD "github.com/nikhilsbhat/gocd-sdk-go"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/thoas/go-funk"
 )
 
 func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen

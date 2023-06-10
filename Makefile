@@ -28,6 +28,7 @@ local.fmt: ## Lints all the go code in the application.
 	@gofmt -w $(GOFMT_FILES)
 	$(GOBIN)/gofumpt -l -w $(GOFMT_FILES)
 	$(GOBIN)/goimports -w $(GOFMT_FILES)
+	$(GOBIN)/gci write $(GOFMT_FILES) --skip-generated
 
 local.check: local.fmt ## Loads all the dependencies to vendor directory
 	@go mod vendor
@@ -47,6 +48,9 @@ lint: ## Lint's application for errors, it is a linters aggregator (https://gith
 
 report: ## Publishes the go-report of the appliction (uses go-reportcard)
 	if [ -z "${DEV}" ]; then goreportcard -v ; else docker run --rm -v $(APP_DIR):/app -w /app basnik/goreportcard-cli:latest goreportcard-cli -v ; fi
+
+generate.document: ## generates cli documents using 'github.com/nikhilsbhat/urfavecli-docgen'.
+	@go generate github.com/nikhilsbhat/gocd-prometheus-exporter/docs
 
 test: ## runs test cases
 	@go test ./... -mod=vendor -coverprofile cover.out && go tool cover -html=cover.out -o cover.html && open cover.html
