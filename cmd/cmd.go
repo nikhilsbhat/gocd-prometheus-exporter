@@ -10,15 +10,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/app"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/exporter"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/gocd"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/version"
+	gocdsdk "github.com/nikhilsbhat/gocd-sdk-go"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/promlog"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
@@ -162,7 +162,7 @@ func registerFlags() []cli.Flag {
 			Name:    flagConfigPath,
 			Usage:   "path to file containing configurations for exporter",
 			Aliases: []string{"c"},
-			Value:   filepath.Join(os.Getenv("HOME"), fmt.Sprintf("%s.%s", common.ExporterConfigFileName, common.ExporterConfigFileExt)),
+			Value:   filepath.Join(os.Getenv("HOME"), fmt.Sprintf("%s.%s", common.GoCDExporterName, common.ExporterConfigFileExt)),
 		},
 		&cli.StringSliceFlag{
 			Name:    flagSkipMetrics,
@@ -190,6 +190,11 @@ func registerFlags() []cli.Flag {
 }
 
 func goCdExport(context *cli.Context) error {
+	logger := logrus.New()
+	logger.SetLevel(gocdsdk.GetLoglevel(context.String(flagLogLevel)))
+	logger.WithField(common.GoCDExporterName, true)
+	logger.SetFormatter(&logrus.JSONFormatter{})
+
 	config := app.Config{
 		GoCdBaseURL:           context.String(flagGoCdBaseURL),
 		GoCdUserName:          context.String(flagGoCdUsername),
@@ -215,17 +220,11 @@ func goCdExport(context *cli.Context) error {
 
 	signal.Notify(sigChan, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP, syscall.SIGQUIT) //nolint:govet
 
-	promLogConfig := &promlog.Config{Level: &promlog.AllowedLevel{}, Format: &promlog.AllowedFormat{}}
-	if err = promLogConfig.Level.Set(finalConfig.LogLevel); err != nil {
-		return fmt.Errorf("configuring logger errored with: %w", err)
-	}
-	logger := promlog.New(promLogConfig)
-
 	var caContent []byte
 	if len(finalConfig.CaPath) != 0 {
 		ca, err := os.ReadFile(finalConfig.CaPath)
 		if err != nil {
-			level.Error(logger).Log(common.LogCategoryErr, getCAErrMsg(finalConfig.CaPath)) //nolint:errcheck
+			logger.Fatal(getCAErrMsg(finalConfig.CaPath))
 		}
 		caContent = ca
 	}
@@ -243,9 +242,9 @@ func goCdExport(context *cli.Context) error {
 	// listens to terminate signal
 	go func() {
 		sig := <-sigChan
-		level.Info(logger).Log("msg", fmt.Sprintf("caught signal %v: terminating in %v", sig, finalConfig.AppGraceDuration)) //nolint:errcheck
+		logger.Infof("caught signal %v: terminating in %v", sig, finalConfig.AppGraceDuration)
 		time.Sleep(context.Duration(flagGraceDuration))
-		level.Info(logger).Log("msg", getAppTerminationMsg(finalConfig.Port)) //nolint:errcheck
+		logger.Info(getAppTerminationMsg(finalConfig.Port))
 		os.Exit(0)
 	}()
 
@@ -253,8 +252,8 @@ func goCdExport(context *cli.Context) error {
 		_, _ = w.Write([]byte(getRedirectData(finalConfig.Endpoint)))
 	})
 
-	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on port: %d", finalConfig.Port))         //nolint:errcheck
-	level.Info(logger).Log(common.LogCategoryMsg, fmt.Sprintf("metrics will be exposed on endpoint: %s", finalConfig.Endpoint)) //nolint:errcheck
+	logger.Infof("metrics will be exposed on port: %d", finalConfig.Port)
+	logger.Infof("metrics will be exposed on endpoint: %s", finalConfig.Endpoint)
 
 	http.Handle(finalConfig.Endpoint, promhttp.Handler())
 

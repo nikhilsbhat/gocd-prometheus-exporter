@@ -1,17 +1,12 @@
 package gocd
 
-import (
-	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
-)
-
 func (conf *client) updateEnvironmentInfo() {
 	conf.lock.Lock()
-	client := conf.getCronClient()
+	goClient := conf.getCronClient()
 
-	environmentInfo, err := client.GetEnvironments()
+	environmentInfo, err := goClient.GetEnvironments()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("environment", err.Error())) //nolint:errcheck
+		conf.logger.Error(apiError("environment", err.Error()))
 	}
 
 	if err == nil {

@@ -1,17 +1,12 @@
 package gocd
 
-import (
-	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
-)
-
 func (conf *client) updateConfigRepoInfo() {
 	conf.lock.Lock()
-	client := conf.getCronClient()
+	goClient := conf.getCronClient()
 
-	repos, err := client.GetConfigRepos()
+	repos, err := goClient.GetConfigRepos()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("config repo", err.Error())) //nolint:errcheck
+		conf.logger.Error(apiError("config repo", err.Error()))
 	}
 
 	if err == nil {

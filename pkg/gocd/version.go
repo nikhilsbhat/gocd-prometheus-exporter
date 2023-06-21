@@ -1,17 +1,12 @@
 package gocd
 
-import (
-	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
-)
-
 func (conf *client) updateVersionInfo() {
 	conf.lock.Lock()
-	client := conf.getCronClient()
+	goClient := conf.getCronClient()
 
-	version, err := client.GetVersionInfo()
+	version, err := goClient.GetVersionInfo()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("version", err.Error())) //nolint:errcheck
+		conf.logger.Error(apiError("version", err.Error()))
 	}
 
 	if err == nil {

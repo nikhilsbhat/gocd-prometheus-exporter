@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/go-kit/log/level"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/nikhilsbhat/gocd-sdk-go"
 )
 
 func (conf *client) updateAgentsInfo() {
 	conf.lock.Lock()
-	client := conf.getCronClient()
+	goClient := conf.getCronClient()
 
-	agentsInfo, err := client.GetAgents()
+	agentsInfo, err := goClient.GetAgents()
 	if err != nil {
-		level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
+		conf.logger.Error(apiError("agents", err.Error()))
 	}
 
 	if err == nil {
@@ -27,14 +25,14 @@ func (conf *client) updateAgentsInfo() {
 
 func (conf *client) updateAgentJobRunHistory() {
 	conf.lock.Lock()
-	client := conf.getCronClient()
+	goClient := conf.getCronClient()
 
 	agentsJobRunHistory := make([]gocd.AgentJobHistory, 0)
 	var errors []string
 	for _, agent := range CurrentAgentsConfig {
-		agentJobRunHistory, err := client.GetAgentJobRunHistory(agent.ID)
+		agentJobRunHistory, err := goClient.GetAgentJobRunHistory(agent.ID)
 		if err != nil {
-			level.Error(conf.logger).Log(common.LogCategoryErr, apiError("agents", err.Error())) //nolint:errcheck
+			conf.logger.Error(apiError("agents", err.Error()))
 			errors = append(errors, err.Error())
 		}
 		agentsJobRunHistory = append(agentsJobRunHistory, agentJobRunHistory)

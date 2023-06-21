@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
-	"github.com/go-kit/log/level"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/thoas/go-funk"
 )
@@ -17,7 +16,7 @@ const (
 
 // CronSchedulers schedules all the jobs so that data will be available for the exporter to serve.
 func (conf *client) CronSchedulers() { //nolint:funlen
-	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronMessages("api", conf.config.APICron)) //nolint:errcheck
+	conf.logger.Infof(getCronMessages("api", conf.config.APICron))
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
@@ -76,15 +75,15 @@ func (conf *client) CronSchedulers() { //nolint:funlen
 }
 
 func (conf *client) schedule(scheduler *gocron.Scheduler, metric string, taskFunc func()) {
-	level.Info(conf.logger).Log(common.LogCategoryMsg, getCronEnbaled(metric)) //nolint:errcheck
+	conf.logger.Infof(getCronEnbaled(metric))
 	job, err := scheduler.Every(conf.getCron(metric)).StartAt(time.Now().Add(defaultStartAtSeconds * time.Second)).Do(taskFunc)
 	if err != nil {
 		log.Fatal(err)
 	}
 	job.SetEventListeners(func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronScheduledMessage(metric, job.RunCount())) //nolint:errcheck
+		conf.logger.Infof(getCronScheduledMessage(metric, job.RunCount()))
 	}, func() {
-		level.Info(conf.logger).Log(common.LogCategoryMsg, getCronCompleteMessage(metric, job.RunCount())) //nolint:errcheck
+		conf.logger.Infof(getCronCompleteMessage(metric, job.RunCount()))
 	})
 
 	gocron.SetPanicHandler(func(jobName string, recoverData interface{}) {

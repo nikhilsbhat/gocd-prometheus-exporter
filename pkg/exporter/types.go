@@ -3,14 +3,14 @@ package exporter
 import (
 	"sync"
 
-	"github.com/go-kit/log"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/sirupsen/logrus"
 )
 
 type Exporter struct {
 	mutex              sync.Mutex
-	logger             log.Logger
+	logger             *logrus.Logger
 	skipMetrics        []string
 	agentsCount        *prometheus.GaugeVec
 	agentDisk          *prometheus.GaugeVec
@@ -27,7 +27,7 @@ type Exporter struct {
 	pipelineState      *prometheus.GaugeVec
 }
 
-func NewExporter(logger log.Logger, skipMetrics []string) *Exporter {
+func NewExporter(logger *logrus.Logger, skipMetrics []string) *Exporter {
 	return &Exporter{
 		logger:      logger,
 		skipMetrics: skipMetrics,
