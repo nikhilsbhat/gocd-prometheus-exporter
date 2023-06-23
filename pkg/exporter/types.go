@@ -9,22 +9,23 @@ import (
 )
 
 type Exporter struct {
-	mutex              sync.Mutex
-	logger             *logrus.Logger
-	skipMetrics        []string
-	agentsCount        *prometheus.GaugeVec
-	agentDisk          *prometheus.GaugeVec
-	agentDown          *prometheus.GaugeVec
-	serverHealth       *prometheus.GaugeVec
-	configRepoCount    *prometheus.GaugeVec
-	pipelineGroupCount *prometheus.GaugeVec
-	pipelineCount      *prometheus.GaugeVec
-	backupConfigured   *prometheus.GaugeVec
-	adminCount         *prometheus.GaugeVec
-	environmentCount   *prometheus.GaugeVec
-	versionInfo        *prometheus.GaugeVec
-	jobStatus          *prometheus.GaugeVec
-	pipelineState      *prometheus.GaugeVec
+	mutex               sync.Mutex
+	logger              *logrus.Logger
+	skipMetrics         []string
+	agentsCount         *prometheus.GaugeVec
+	agentDisk           *prometheus.GaugeVec
+	agentDown           *prometheus.GaugeVec
+	serverHealth        *prometheus.GaugeVec
+	configRepoCount     *prometheus.GaugeVec
+	pipelineGroupCount  *prometheus.GaugeVec
+	pipelineCount       *prometheus.GaugeVec
+	backupConfigured    *prometheus.GaugeVec
+	adminCount          *prometheus.GaugeVec
+	environmentCount    *prometheus.GaugeVec
+	versionInfo         *prometheus.GaugeVec
+	jobStatus           *prometheus.GaugeVec
+	pipelineState       *prometheus.GaugeVec
+	elasticProfileUsage *prometheus.GaugeVec
 }
 
 func NewExporter(logger *logrus.Logger, skipMetrics []string) *Exporter {
@@ -102,5 +103,10 @@ func NewExporter(logger *logrus.Logger, skipMetrics []string) *Exporter {
 			Name:      common.MetricPipelineState,
 			Help:      "GoCD pipeline state",
 		}, []string{"name", "paused", "locked", "schedulable", "paused_by"}),
+		elasticProfileUsage: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricElasticAgentProfileUsage,
+			Help:      "GoCD elastic agents profile usage",
+		}, []string{"name", "pipeline_name", "stage_name", "job_name", "pipeline_config_origin"}),
 	}
 }

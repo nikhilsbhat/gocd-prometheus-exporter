@@ -120,6 +120,16 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 		}
 		e.pipelineState.Collect(channel)
 	}
+
+	// fetching agent down and agent disk space metrics
+	if !funk.Contains(e.skipMetrics, common.MetricElasticAgentProfileUsage) {
+		for _, elasticProfile := range gocd.CurrentElasticProfileUsage {
+			for _, usage := range elasticProfile.Usage {
+				e.elasticProfileUsage.WithLabelValues(elasticProfile.Name, usage.PipelineName, usage.StageName, usage.JobName, usage.PipelineConfigOrigin).Set(1)
+			}
+		}
+		e.elasticProfileUsage.Collect(channel)
+	}
 }
 
 func (e *Exporter) Describe(channel chan<- *prometheus.Desc) {

@@ -29,4 +29,6 @@ var (
 	CurrentPipelines []string
 	// CurrentPipelineState holds the information of the latest state of pipelines available in GoCD.
 	CurrentPipelineState []gocd.PipelineState
+	// CurrentElasticProfileUsage holds the information of the pipelines using various elastic agent profiles.
+	CurrentElasticProfileUsage []ElasticProfileUsage
 )

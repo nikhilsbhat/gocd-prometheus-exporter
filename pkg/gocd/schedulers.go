@@ -67,6 +67,10 @@ func (conf *client) CronSchedulers() { //nolint:funlen
 		conf.schedule(scheduler, common.MetricPipelineState, conf.updatePipelineState)
 	}
 
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricElasticAgentProfileUsage) {
+		conf.schedule(scheduler, common.MetricElasticAgentProfileUsage, conf.updateElasticProfileInfo)
+	}
+
 	scheduler.NextRun()
 	scheduler.StartAsync()
 	scheduler.SingletonMode()
