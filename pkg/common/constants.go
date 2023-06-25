@@ -24,6 +24,7 @@ const (
 	MetricPipelines                = "pipelines"
 	MetricPipelineState            = "pipeline_state"
 	MetricElasticAgentProfileUsage = "elastic_agent_profile_usage"
+	MetricPlugins                  = "plugins"
 )
 
 const (

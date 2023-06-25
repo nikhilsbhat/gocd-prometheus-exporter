@@ -31,4 +31,6 @@ var (
 	CurrentPipelineState []gocd.PipelineState
 	// CurrentElasticProfileUsage holds the information of the pipelines using various elastic agent profiles.
 	CurrentElasticProfileUsage []ElasticProfileUsage
+	// CurrentPluginInfo holds the information of the plugins installed in GoCD.
+	CurrentPluginInfo []gocd.Plugin
 )

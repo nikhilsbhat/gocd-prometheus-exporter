@@ -130,6 +130,14 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 		}
 		e.elasticProfileUsage.Collect(channel)
 	}
+
+	// fetching agent down and agent disk space metrics
+	if !funk.Contains(e.skipMetrics, common.MetricPlugins) {
+		for _, plugin := range gocd.CurrentPluginInfo {
+			e.plugins.WithLabelValues(plugin.ID, plugin.Status.State, strconv.FormatBool(plugin.BundledPlugin)).Set(1)
+		}
+		e.plugins.Collect(channel)
+	}
 }
 
 func (e *Exporter) Describe(channel chan<- *prometheus.Desc) {
