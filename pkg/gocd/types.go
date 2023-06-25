@@ -33,4 +33,6 @@ var (
 	CurrentElasticProfileUsage []ElasticProfileUsage
 	// CurrentPluginInfo holds the information of the plugins installed in GoCD.
 	CurrentPluginInfo []gocd.Plugin
+	// CurrentPipelineNotRun holds the information of the pipelines not run in last X days.
+	CurrentPipelineNotRun []PipelineRunHistory
 )

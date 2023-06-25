@@ -25,6 +25,7 @@ const (
 	MetricPipelineState            = "pipeline_state"
 	MetricElasticAgentProfileUsage = "elastic_agent_profile_usage"
 	MetricPlugins                  = "plugins"
+	MetricPipelineNotRun           = "pipeline_not_run"
 )
 
 const (

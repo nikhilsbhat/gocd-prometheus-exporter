@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/go-co-op/gocron v1.16.2
 	github.com/imdario/mergo v0.3.13
-	github.com/nikhilsbhat/gocd-sdk-go v0.1.3
+	github.com/nikhilsbhat/gocd-sdk-go v0.1.4
 	github.com/nikhilsbhat/urfavecli-docgen v0.0.1
 	github.com/prometheus/client_golang v1.12.2
 	github.com/sirupsen/logrus v1.9.3

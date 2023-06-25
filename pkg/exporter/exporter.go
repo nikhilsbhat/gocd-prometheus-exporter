@@ -138,6 +138,17 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 		}
 		e.plugins.Collect(channel)
 	}
+
+	const intBase = 10
+	// fetching pipelines not run in last X days
+	if !funk.Contains(e.skipMetrics, common.MetricPipelineNotRun) {
+		for _, pipeline := range gocd.CurrentPipelineNotRun {
+			e.pipelineNotRun.WithLabelValues(pipeline.Usage.Name,
+				strconv.FormatInt(pipeline.Usage.Groups[0].History[0].ScheduledTimestamp, intBase),
+				pipeline.Usage.Groups[0].History[0].ScheduledDate).Set(pipeline.NotRunIn)
+		}
+		e.pipelineNotRun.Collect(channel)
+	}
 }
 
 func (e *Exporter) Describe(channel chan<- *prometheus.Desc) {

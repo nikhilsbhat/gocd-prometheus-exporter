@@ -37,7 +37,10 @@ linters-settings:
     threshold: 450
 
   gocognit:
-    min-complexity: 50
+    min-complexity: 100
+
+  gocyclo:
+    min-complexity: 40
 
 run:
   concurrency: 10

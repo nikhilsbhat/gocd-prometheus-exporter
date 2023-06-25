@@ -27,6 +27,7 @@ type Exporter struct {
 	pipelineState       *prometheus.GaugeVec
 	elasticProfileUsage *prometheus.GaugeVec
 	plugins             *prometheus.GaugeVec
+	pipelineNotRun      *prometheus.GaugeVec
 }
 
 func NewExporter(logger *logrus.Logger, skipMetrics []string) *Exporter {
@@ -114,5 +115,10 @@ func NewExporter(logger *logrus.Logger, skipMetrics []string) *Exporter {
 			Name:      common.MetricPlugins,
 			Help:      "GoCD elastic agents plugin usage",
 		}, []string{"id", "state", "bundled"}),
+		pipelineNotRun: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricPipelineNotRun,
+			Help:      "GoCD pipeline not run in last X days",
+		}, []string{"pipeline", "scheduled_timestamp", "scheduled_date"}),
 	}
 }
