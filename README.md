@@ -113,6 +113,28 @@ gocd_pipeline_group_count{pipeline_groups="all"} 0
 # TYPE gocd_pipeline_size gauge
 gocd_pipeline_size{pipeline_path="",type="dir"} 0
 gocd_pipeline_size{pipeline_path="",type="link"} 0
+# HELP gocd_plugins GoCD elastic agents plugin usage
+# TYPE gocd_plugins gauge
+gocd_plugins{bundled="true",id="yaml.config.plugin",state="active"} 1
+gocd_plugins{bundled="true",id="yum",state="invalid"} 1
+# HELP gocd_pipeline_state GoCD pipeline state
+# TYPE gocd_pipeline_state gauge
+gocd_pipeline_state{locked="false",name="action-movies",paused="false",paused_by="",schedulable="true"} 0
+gocd_pipeline_state{locked="false",name="action-movies-manual",paused="false",paused_by="",schedulable="true"} 0
+# HELP gocd_elastic_agent_profile_usage GoCD elastic agents profile usage
+# TYPE gocd_elastic_agent_profile_usage gauge
+gocd_elastic_agent_profile_usage{job_name="lint",name="sample_ec2",pipeline_config_origin="gocd",pipeline_name="helm-drift",stage_name="lint"} 1
+# HELP gocd_pipeline_not_run GoCD pipeline not run in last X days
+# TYPE gocd_pipeline_not_run gauge
+gocd_pipeline_not_run{pipeline="gocd-prometheus-exporter",scheduled_date="25 Jun, 2023 at 19:47:02 [+0530]",scheduled_timestamp="1687702622382"} 0.12195940645833332
+gocd_pipeline_not_run{pipeline="helm-images",scheduled_date="25 Jun, 2023 at 19:48:16 [+0530]",scheduled_timestamp="1687702696672"} 0.12109960001157406
+# HELP gocd_server_health errors and warning present in GoCD
+# TYPE gocd_server_health gauge
+gocd_server_health{message="Message from plugin: com.thoughtworks.gocd.analytics",type="ERROR"} 1
+gocd_server_health{message="Message from plugin: com.thoughtworks.gocd.analytics",type="WARNING"} 1
+# HELP gocd_version GoCD server version
+# TYPE gocd_version gauge
+gocd_version{full_version="22.1.0 (13913-f4c9c1650e2e27fe0a9962faa39536f94f57e297)",git_sha="f4c9c1650e2e27fe0a9962faa39536f94f57e297",version="22.1.0"} 1
 ```
 
 ## Documentation
