@@ -21,7 +21,7 @@ Most importantly disk check is an expensive operation which can spike resource c
 
 ## Requirements
 
-* [Go](https://golang.org/dl/) 1.17 or above . Installing go can be found [here](https://golang.org/doc/install).
+* [Go](https://golang.org/dl/) 1.19 or above . Installing go can be found [here](https://golang.org/doc/install).
 * Basic understanding of prometheus exporter and its golang [client](https://github.com/prometheus/client_golang.git) libraries and [building](https://prometheus.io/docs/guides/go-application/) them.
 
 
@@ -140,6 +140,10 @@ gocd_version{full_version="22.1.0 (13913-f4c9c1650e2e27fe0a9962faa39536f94f57e29
 ## Documentation
 
 Updated documentation on all available commands and flags can be found [here](https://github.com/nikhilsbhat/gocd-prometheus-exporter/blob/master/docs/doc/gocd_prometheus_exporter.md).
+
+### Note
+The environment variable `GOCD_PIPELINE_DAYS_TO_SKIP` can be set with a value to drop pipeline from consideration for the metric `gocd_pipeline_not_run`.</br>
+**Ex:** Setting `GOCD_PIPELINE_DAYS_TO_SKIP` to 10 would make one drop all pipelines whose last run is not within 10 days
 
 ## TODO
 * [ ] Expose more metrics.

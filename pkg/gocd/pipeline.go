@@ -92,14 +92,27 @@ func (conf *client) updatePipelineRunInLastXDays() {
 		pipelineStatus, err := goClient.GetPipelineSchedules(pipeline, "0", "1")
 		if err != nil {
 			conf.logger.Error(apiError(common.MetricPipelineState, err.Error()))
-		}
 
-		if pipelineStatus.Groups[0].History[0].ScheduledDate == "N/A" {
 			continue
 		}
 
-		timeThen := time.UnixMilli(pipelineStatus.Groups[0].History[0].ScheduledTimestamp).UTC()
 		timeNow := time.Now()
+		var timeThen time.Time
+
+		const faultyLength = 2
+		if len(pipelineStatus.Groups) == faultyLength {
+			if pipelineStatus.Groups[1].History[0].ScheduledDate == "N/A" {
+				continue
+			}
+
+			timeThen = time.UnixMilli(pipelineStatus.Groups[1].History[0].ScheduledTimestamp).UTC()
+		} else {
+			if pipelineStatus.Groups[0].History[0].ScheduledDate == "N/A" {
+				continue
+			}
+
+			timeThen = time.UnixMilli(pipelineStatus.Groups[0].History[0].ScheduledTimestamp).UTC()
+		}
 
 		timeDiff := timeNow.Sub(timeThen).Round(1).Hours()
 
