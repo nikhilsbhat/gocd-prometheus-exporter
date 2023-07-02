@@ -12,12 +12,13 @@ prometheus exporter for `GoCD` that helps in collecting few metrics from [GoCD](
 
 ## Introduction
 
-Prometheus exporter that helps in collecting various metadata and other information from GoCD and exposes it as metrics.
+A Prometheus exporter that helps in collecting various metadata and other information from GoCD and exposes it as metrics.
 
-This interacts with `GoCD` server's api to collect metrics, also monitors pipeline directories specified when deployed in GoCD server.
+And this interacts with the `GoCD` server's API to collect information and expose it as a metric.
 
-It schedules both metric collections from `GoCD` server and pipeline size as cron to reduce resource spike when /metrics is invoked.
-Most importantly disk check is an expensive operation which can spike resource consumption, by doing this way load on the platform exporter is running can be reduced.
+It schedules both metric collections from the `GoCD` server and pipeline size as cron to reduce resource spikes when /metrics is invoked.
+Not all the data in the CI tool changes that frequently, so we do not need to overburden it with an enormous number of API calls (most of which turn out to be expensive).</br>
+And the cron would address this issue by invoking these APIs on a schedule basis, cache them locally, and serve them when they are scraped.
 
 ## Requirements
 
