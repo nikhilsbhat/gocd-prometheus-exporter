@@ -28,6 +28,7 @@ type Exporter struct {
 	elasticProfileUsage *prometheus.GaugeVec
 	plugins             *prometheus.GaugeVec
 	pipelineNotRun      *prometheus.GaugeVec
+	configRepoFailure   *prometheus.GaugeVec
 }
 
 func NewExporter(logger *logrus.Logger, skipMetrics []string) *Exporter {
@@ -120,5 +121,10 @@ func NewExporter(logger *logrus.Logger, skipMetrics []string) *Exporter {
 			Name:      common.MetricPipelineNotRun,
 			Help:      "GoCD pipeline not run in last X days",
 		}, []string{"pipeline", "scheduled_timestamp", "scheduled_date"}),
+		configRepoFailure: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: common.Namespace,
+			Name:      common.MetricConfigRepoFailed,
+			Help:      "GoCD config repos those are in failed state",
+		}, []string{"name", "plugin_id"}),
 	}
 }

@@ -5,13 +5,13 @@ go 1.19
 require (
 	github.com/go-co-op/gocron v1.16.2
 	github.com/imdario/mergo v0.3.13
-	github.com/nikhilsbhat/gocd-sdk-go v0.1.4
-	github.com/nikhilsbhat/urfavecli-docgen v0.0.1
+	github.com/nikhilsbhat/gocd-sdk-go v0.1.6
+	github.com/nikhilsbhat/urfavecli-docgen v0.0.2-0.20230702063718-68faea211625
 	github.com/prometheus/client_golang v1.12.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.2
 	github.com/thoas/go-funk v0.9.2
-	github.com/urfave/cli/v2 v2.25.5
+	github.com/urfave/cli/v2 v2.25.7
 	gopkg.in/yaml.v2 v2.4.0
 )
 

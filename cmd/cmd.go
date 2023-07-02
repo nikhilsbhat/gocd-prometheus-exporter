@@ -15,7 +15,7 @@ import (
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/exporter"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/gocd"
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/version"
-	gocdsdk "github.com/nikhilsbhat/gocd-sdk-go"
+	goCDLogger "github.com/nikhilsbhat/gocd-sdk-go/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
@@ -191,7 +191,7 @@ func registerFlags() []cli.Flag {
 
 func goCdExport(context *cli.Context) error {
 	logger := logrus.New()
-	logger.SetLevel(gocdsdk.GetLoglevel(context.String(flagLogLevel)))
+	logger.SetLevel(goCDLogger.GetLoglevel(context.String(flagLogLevel)))
 	logger.WithField(common.GoCDExporterName, true)
 	logger.SetFormatter(&logrus.JSONFormatter{})
 

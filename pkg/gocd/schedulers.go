@@ -28,6 +28,10 @@ func (conf *client) CronSchedulers() { //nolint:funlen
 		conf.schedule(scheduler, common.MetricConfigRepoCount, conf.updateConfigRepoInfo)
 	}
 
+	if !funk.Contains(conf.config.SkipMetrics, common.MetricConfigRepoFailed) {
+		conf.schedule(scheduler, common.MetricConfigRepoFailed, conf.updateFailedConfigRepoInfo)
+	}
+
 	if !funk.Contains(conf.config.SkipMetrics, common.MetricConfiguredBackup) {
 		conf.schedule(scheduler, common.MetricConfiguredBackup, conf.updateBackupInfo)
 	}

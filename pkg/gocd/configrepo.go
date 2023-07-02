@@ -15,3 +15,19 @@ func (conf *client) updateConfigRepoInfo() {
 
 	defer conf.lock.Unlock()
 }
+
+func (conf *client) updateFailedConfigRepoInfo() {
+	conf.lock.Lock()
+	goClient := conf.getCronClient()
+
+	repos, err := goClient.GetConfigReposInternal()
+	if err != nil {
+		conf.logger.Error(apiError("errored config repo", err.Error()))
+	}
+
+	if err == nil {
+		CurrentFailedConfigRepos = repos
+	}
+
+	defer conf.lock.Unlock()
+}

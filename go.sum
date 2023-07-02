@@ -168,10 +168,10 @@ github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3Rllmb
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
-github.com/nikhilsbhat/gocd-sdk-go v0.1.4 h1:4hBs/qRLBgbh+M77OEEtx/Tqe9cgowMD+s1mvQuDQOI=
-github.com/nikhilsbhat/gocd-sdk-go v0.1.4/go.mod h1:bIE3Xr7rRzOo0xSX/oa13kXNdFTgCR3JtCh/SontbwM=
-github.com/nikhilsbhat/urfavecli-docgen v0.0.1 h1:4TGlIdu4B1g7mimBfJwhSvmRVEIDopg4YEnj+Jhj4hg=
-github.com/nikhilsbhat/urfavecli-docgen v0.0.1/go.mod h1:Sic6eN9ycc3BAzhYbf0udR6ijQWAPffDsqNxDLBhveQ=
+github.com/nikhilsbhat/gocd-sdk-go v0.1.6 h1:ACtxh6VZ2FyfCxPF/+8Ideuv+6gW0dbt3p9ZqnLbjtw=
+github.com/nikhilsbhat/gocd-sdk-go v0.1.6/go.mod h1:bIE3Xr7rRzOo0xSX/oa13kXNdFTgCR3JtCh/SontbwM=
+github.com/nikhilsbhat/urfavecli-docgen v0.0.2-0.20230702063718-68faea211625 h1:eNjNl3jEciL8iNQXADG9AAnimihgA8nfBDvj1F0Mixw=
+github.com/nikhilsbhat/urfavecli-docgen v0.0.2-0.20230702063718-68faea211625/go.mod h1:EoBnqreoCMSDxHprLCRSNEe1D+KbbMW64vNEnQzUXRg=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
@@ -228,8 +228,8 @@ github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/thoas/go-funk v0.9.2 h1:oKlNYv0AY5nyf9g+/GhMgS/UO2ces0QRdPKwkhY3VCk=
 github.com/thoas/go-funk v0.9.2/go.mod h1:+IWnUfUmFO1+WVYQWQtIJHeRRdaIyyYglZN7xzUPe4Q=
-github.com/urfave/cli/v2 v2.25.5 h1:d0NIAyhh5shGscroL7ek/Ya9QYQE0KNabJgiUinIQkc=
-github.com/urfave/cli/v2 v2.25.5/go.mod h1:GHupkWPMM0M/sj1a2b4wUrWBPzazNrIjouW6fmdJLxc=
+github.com/urfave/cli/v2 v2.25.7 h1:VAzn5oq403l5pHjc4OhD54+XGO9cdKVL/7lDjF+iKUs=
+github.com/urfave/cli/v2 v2.25.7/go.mod h1:8qnjx1vcq5s2/wpsqoZFndg2CE5tNFyrTvS6SinrnYQ=
 github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 h1:bAn7/zixMGCfxrRTfdpNzjtPYqr8smhKouy9mxVdGPU=
 github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673/go.mod h1:N3UwUGtsrSj3ccvlPHLoLsHnpR27oXr4ZE984MbSER8=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

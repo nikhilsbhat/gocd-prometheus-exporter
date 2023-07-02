@@ -13,6 +13,8 @@ var (
 	CurrentServerHealth []gocd.ServerHealth
 	// CurrentConfigRepos holds updated config repo information present GoCD server.
 	CurrentConfigRepos []gocd.ConfigRepo
+	// CurrentFailedConfigRepos holds updated config repos present GoCD server and are in errored state.
+	CurrentFailedConfigRepos []gocd.ConfigRepo
 	// CurrentPipelineGroup holds updated pipeline group information present GoCD server.
 	CurrentPipelineGroup []gocd.PipelineGroup
 	// CurrentEnvironments holds updated environment information present GoCD server.

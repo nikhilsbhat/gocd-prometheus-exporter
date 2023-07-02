@@ -46,6 +46,16 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 		e.configRepoCount.Collect(channel)
 	}
 
+	// fetching config repo in errored state
+	if !funk.Contains(e.skipMetrics, common.MetricConfigRepoFailed) {
+		for _, repo := range gocd.CurrentFailedConfigRepos {
+			if len(repo.ConfigRepoParseInfo.Error) != 0 {
+				e.configRepoFailure.WithLabelValues(repo.ID, repo.PluginID).Set(1)
+			}
+		}
+		e.configRepoFailure.Collect(channel)
+	}
+
 	// fetching system admins metrics
 	if !funk.Contains(e.skipMetrics, common.MetricSystemAdminsCount) {
 		e.adminCount.WithLabelValues("all").Set(float64(len(gocd.CurrentSystemAdmins.Users)))
@@ -142,6 +152,7 @@ func (e *Exporter) collect(channel chan<- prometheus.Metric) { //nolint:funlen
 	const intBase = 10
 	// fetching pipelines not run in last X days
 	if !funk.Contains(e.skipMetrics, common.MetricPipelineNotRun) {
+		e.pipelineNotRun.Reset()
 		for _, pipeline := range gocd.CurrentPipelineNotRun {
 			e.pipelineNotRun.WithLabelValues(pipeline.Usage.Name,
 				strconv.FormatInt(pipeline.Usage.Groups[0].History[0].ScheduledTimestamp, intBase),
