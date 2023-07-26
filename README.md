@@ -64,24 +64,24 @@ COMMANDS:
    help, h     Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --log-level value, --log value                                           set log level for the GoCd exporter (default: "info")
-   --port value, -p value                                                   port on which the metrics to be exposed (default: 8090)
-   --endpoint value, -e value                                               path under which the metrics to be exposed (default: "/metrics")
-   --goCd-server-url value, --server value                                  GoCd server url to which the exporter needs to be connected
-   --goCd-username value, --user value                                      required username for establishing connection to GoCd server if auth enabled [$GOCD_USERNAME]
-   --goCd-password value, --password value                                  required password for establishing connection to GoCd server if auth enabled [$GOCD_PASSWORD]
-   --goCd-bearer-token value, --token value                                 required bearer-token for establishing connection to GoCd server if auth enabled [$GOCD_BEARER_TOKEN]
-   --insecure-tls, --insecure                                               enable insecure TLS if you wish to connect to GOCD insecurily (default: false)
-   --ca-path value, --ca value                                              path to file containing CA information to make secure connections to GoCd
-   --grace-duration value, -d value                                         time duration to wait before stopping the service (default: 5s)
-   --config-file value, -c value                                            path to file containing configurations for exporter (default: "/Users/nikhil.bhat/gocd-prometheus-exporter.yaml")
-   --skip-metrics value, --sk value [ --skip-metrics value, --sk value ]    list of metrics to be skipped
-   --api-cron-schedule value, --cron value                                  cron expression to schedule the metric collection.
-                                                                              - 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
-                                                                                and stores the latest values in memory.
-                                                                              - This is to reduce the load on the GoCd server when api requests are made to GoCd.
-                                                                              - All expressions supported by github.com/go-co-op/gocron will be supported (default: "30s")
-   --help, -h                                                               show help
+   --log-level value, --log value                                         set log level for the GoCd exporter (default: "info")
+   --port value, -p value                                                 port on which the metrics to be exposed (default: 8090)
+   --endpoint value, -e value                                             path under which the metrics to be exposed (default: "/metrics")
+   --goCd-server-url value, --server value                                GoCd server url to which the exporter needs to be connected
+   --goCd-username value, --user value                                    required username for establishing connection to GoCd server if auth enabled [$GOCD_USERNAME]
+   --goCd-password value, --password value                                required password for establishing connection to GoCd server if auth enabled [$GOCD_PASSWORD]
+   --goCd-bearer-token value, --token value                               required bearer-token for establishing connection to GoCd server if auth enabled [$GOCD_BEARER_TOKEN]
+   --insecure-tls, --insecure                                             enable insecure TLS if you wish to connect to GOCD insecurily (default: false)
+   --ca-path value, --ca value                                            path to file containing CA information to make secure connections to GoCd
+   --grace-duration value, -d value                                       time duration to wait before stopping the service (default: 5s)
+   --config-file value, -c value                                          path to file containing configurations for exporter (default: "/Users/nikhil.bhat/gocd-prometheus-exporter.yaml")
+   --skip-metrics value, --sk value [ --skip-metrics value, --sk value ]  list of metrics to be skipped
+   --api-cron-schedule value, --cron value                                cron expression to schedule the metric collection.
+                                                                            - 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
+                                                                              and stores the latest values in memory.
+                                                                            - This is to reduce the load on the GoCd server when api requests are made to GoCd.
+                                                                            - All expressions supported by github.com/go-co-op/gocron will be supported (default: "30s")
+   --help, -h                                                             show help
 ```
 
 ### Run

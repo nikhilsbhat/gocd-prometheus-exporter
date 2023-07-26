@@ -18,16 +18,15 @@ func TestGetConfig(t *testing.T) {
 	}
 	t.Run("Should fetch config successfully, by merging both config", func(t *testing.T) {
 		expected := app.Config{
-			GoCdUserName:      "testing",
-			GoCdPassword:      "password",
-			InsecureTLS:       false,
-			GoCdPipelinesPath: []string{"/path/to/pipeline/directory1", "/path/to/pipeline/directory2", "/path/to/pipeline/directory3"},
-			Port:              9995,
-			LogLevel:          "debug",
-			SkipMetrics:       []string{"backup_configured", "admin_count"},
-			APICron:           "@every @2m",
-			MetricCron:        map[string]string{"agent_down": "@every 60s"},
-			Endpoint:          "/new-metrics",
+			GoCdUserName: "testing",
+			GoCdPassword: "password",
+			InsecureTLS:  false,
+			Port:         9995,
+			LogLevel:     "debug",
+			SkipMetrics:  []string{"backup_configured", "admin_count"},
+			APICron:      "@every @2m",
+			MetricCron:   map[string]string{"agent_down": "@every 60s"},
+			Endpoint:     "/new-metrics",
 		}
 
 		path, err := filepath.Abs("../../infrastructure/gocd-prometheus-exporter.fixture.yaml")

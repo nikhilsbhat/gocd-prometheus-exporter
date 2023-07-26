@@ -24,8 +24,6 @@ import (
 )
 
 const (
-	flagPipelinePath     = "pipeline-path"
-	flagPipelinePathRoot = "pipeline-root-path"
 	flagLogLevel         = "log-level"
 	flagExporterPort     = "port"
 	flagExporterEndpoint = "endpoint"
@@ -81,16 +79,6 @@ func App() *cli.App {
 
 func registerFlags() []cli.Flag {
 	return []cli.Flag{
-		&cli.StringSliceFlag{
-			Name:    flagPipelinePath,
-			Usage:   "list of paths to pipelines that needs tp be monitored",
-			Aliases: []string{"pt"},
-		},
-		&cli.StringFlag{
-			Name:    flagPipelinePathRoot,
-			Usage:   "root path of pipeline that needs to be monitored",
-			Aliases: []string{"root-path"},
-		},
 		&cli.StringFlag{
 			Name:    flagLogLevel,
 			Usage:   "set log level for the GoCd exporter",
@@ -180,20 +168,18 @@ func goCdExport(context *cli.Context) error {
 	logger.SetFormatter(&logrus.JSONFormatter{})
 
 	config := app.Config{
-		GoCdBaseURL:           context.String(flagGoCdBaseURL),
-		GoCdUserName:          context.String(flagGoCdUsername),
-		GoCdPassword:          context.String(flagGoCdPassword),
-		GoCDBearerToken:       context.String(flagGoCDBearerToken),
-		InsecureTLS:           context.Bool(flagInsecureTLS),
-		GoCdPipelinesPath:     context.StringSlice(flagPipelinePath),
-		GoCdPipelinesRootPath: context.String(flagPipelinePathRoot),
-		CaPath:                context.String(flagCaPath),
-		Port:                  context.Int(flagExporterPort),
-		Endpoint:              context.String(flagExporterEndpoint),
-		LogLevel:              context.String(flagLogLevel),
-		SkipMetrics:           context.StringSlice(flagSkipMetrics),
-		APICron:               context.String(flagAPICronSchedule),
-		AppGraceDuration:      context.Duration(flagGraceDuration),
+		GoCdBaseURL:      context.String(flagGoCdBaseURL),
+		GoCdUserName:     context.String(flagGoCdUsername),
+		GoCdPassword:     context.String(flagGoCdPassword),
+		GoCDBearerToken:  context.String(flagGoCDBearerToken),
+		InsecureTLS:      context.Bool(flagInsecureTLS),
+		CaPath:           context.String(flagCaPath),
+		Port:             context.Int(flagExporterPort),
+		Endpoint:         context.String(flagExporterEndpoint),
+		LogLevel:         context.String(flagLogLevel),
+		SkipMetrics:      context.StringSlice(flagSkipMetrics),
+		APICron:          context.String(flagAPICronSchedule),
+		AppGraceDuration: context.Duration(flagGraceDuration),
 	}
 
 	finalConfig, err := app.GetConfig(config, context.String(flagConfigPath))
