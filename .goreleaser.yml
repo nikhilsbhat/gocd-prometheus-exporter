@@ -38,9 +38,9 @@ dockers:
       - gocd-prometheus-exporter
     skip_push: false
     image_templates:
-      - "basnik/gocd-prometheus-exporter:latest"
-      - "basnik/gocd-prometheus-exporter:{{ .Tag }}"
-      - "basnik/gocd-prometheus-exporter:{{ .Tag }}-{{ .Env.GOVERSION }}"
+      - "ghcr.io/nikhilsbhat/gocd-prometheus-exporter:latest"
+      - "ghcr.io/nikhilsbhat/gocd-prometheus-exporter:{{ .Tag }}"
+      - "ghcr.io/nikhilsbhat/gocd-prometheus-exporter:{{ .Tag }}-{{ .Env.GOVERSION }}"
     dockerfile: Dockerfile
 
 archives:
