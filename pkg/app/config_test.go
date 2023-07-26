@@ -13,7 +13,6 @@ func TestGetConfig(t *testing.T) {
 		Port:         8090,
 		GoCdUserName: "test",
 		GoCdPassword: "password",
-		DiskCron:     "@every 1m",
 		APICron:      "@every 1m",
 		Endpoint:     "/metrics",
 	}
@@ -27,7 +26,6 @@ func TestGetConfig(t *testing.T) {
 			LogLevel:          "debug",
 			SkipMetrics:       []string{"backup_configured", "admin_count"},
 			APICron:           "@every @2m",
-			DiskCron:          "@every @2m",
 			MetricCron:        map[string]string{"agent_down": "@every 60s"},
 			Endpoint:          "/new-metrics",
 		}

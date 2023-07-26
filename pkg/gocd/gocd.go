@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/app"
-	"github.com/nikhilsbhat/gocd-prometheus-exporter/pkg/common"
 	"github.com/nikhilsbhat/gocd-sdk-go"
 	"github.com/sirupsen/logrus"
 )
@@ -33,9 +32,6 @@ func NewClient(config app.Config, logger *logrus.Logger, ca []byte) GoCd {
 }
 
 func (conf *client) getCron(metric string) string {
-	if metric == common.MetricPipelineSize {
-		return conf.config.DiskCron
-	}
 	if val, ok := conf.config.MetricCron[metric]; ok {
 		conf.logger.Debugf("the cron for metric %s would be %s", metric, val)
 

@@ -18,6 +18,7 @@ import (
 	goCDLogger "github.com/nikhilsbhat/gocd-sdk-go/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/exporter-toolkit/web"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -37,7 +38,6 @@ const (
 	flagGraceDuration    = "grace-duration"
 	flagConfigPath       = "config-file"
 	flagSkipMetrics      = "skip-metrics"
-	flagDiskCronSchedule = "disk-cron-schedule"
 	flagAPICronSchedule  = "api-cron-schedule"
 )
 
@@ -46,16 +46,7 @@ const (
 	defaultTimeout = 30
 )
 
-var (
-	redirectData = `<html>
-			 <head><title>GoCd Exporter</title></head>
-			 <body>
-			 <h1>GoCd Exporter</h1>
-			 <p><a href='%s'>Metrics</a></p>
-			 </body>
-			 </html>`
-	sigChan = make(chan os.Signal)
-)
+var sigChan = make(chan os.Signal)
 
 const (
 	defaultGraceDuration = 5
@@ -175,16 +166,9 @@ func registerFlags() []cli.Flag {
                     		- 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
                       			and stores the latest values in memory.
                       		- This is to reduce the load on the GoCd server when api requests are made to GoCd.
-                      		- All expressions supported by https://github.com/robfig/cron will be supported`,
+                      		- All expressions supported by github.com/go-co-op/gocron will be supported`,
 			Aliases: []string{"cron"},
-			Value:   "@every 30s",
-		},
-		&cli.StringFlag{
-			Name: flagDiskCronSchedule,
-			Usage: `cron expression to schedule the pipeline disk usage metric collection.
-                      		- This is to reduce the reduce resource consumed while computing the pipeline disk size.`,
-			Aliases: []string{"disk-cron"},
-			Value:   "@every 30s",
+			Value:   "30s",
 		},
 	}
 }
@@ -209,7 +193,6 @@ func goCdExport(context *cli.Context) error {
 		LogLevel:              context.String(flagLogLevel),
 		SkipMetrics:           context.StringSlice(flagSkipMetrics),
 		APICron:               context.String(flagAPICronSchedule),
-		DiskCron:              context.String(flagDiskCronSchedule),
 		AppGraceDuration:      context.Duration(flagGraceDuration),
 	}
 
@@ -248,13 +231,35 @@ func goCdExport(context *cli.Context) error {
 		os.Exit(0)
 	}()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(getRedirectData(finalConfig.Endpoint)))
-	})
-
 	logger.Infof("metrics will be exposed on port: %d", finalConfig.Port)
 	logger.Infof("metrics will be exposed on endpoint: %s", finalConfig.Endpoint)
 
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, http.StatusText(http.StatusOK), http.StatusOK)
+	})
+
+	landingConfig := web.LandingConfig{
+		Name:        "GoCD Exporter",
+		Description: "Prometheus Exporter for CI/CD server GoCD",
+		Version:     version.GetAppVersion(),
+		Links: []web.LandingLinks{
+			{
+				Address: finalConfig.Endpoint,
+				Text:    "Metrics",
+			},
+			{
+				Address: "/health",
+				Text:    "Health",
+			},
+		},
+	}
+
+	landingPage, err := web.NewLandingPage(landingConfig)
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	http.Handle("/", landingPage)
 	http.Handle(finalConfig.Endpoint, promhttp.Handler())
 
 	server := &http.Server{
@@ -267,8 +272,4 @@ func goCdExport(context *cli.Context) error {
 	}
 
 	return nil
-}
-
-func getRedirectData(endpoint string) string {
-	return fmt.Sprintf(redirectData, endpoint)
 }

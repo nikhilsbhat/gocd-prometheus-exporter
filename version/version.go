@@ -4,6 +4,7 @@ package version
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -61,4 +62,13 @@ func AppVersion(c *cli.Context) error {
 	fmt.Println(string(buildInfo))
 
 	return nil
+}
+
+func GetAppVersion() string {
+	buildInfo, err := json.Marshal(GetBuildInfo())
+	if err != nil {
+		log.Println("fetching app version errored with: %w", err)
+	}
+
+	return string(buildInfo)
 }
