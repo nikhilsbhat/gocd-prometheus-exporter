@@ -1,8 +1,6 @@
 .idea
 /vendor
 *.tar.gz
-gocd-artifact-monitor
-gocd-prometheus-exporter
 prometheus.yml
 /dist
 cover.out

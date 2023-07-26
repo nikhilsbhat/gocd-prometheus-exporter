@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gocd-prometheus-exporter.fullname" . }}
+  labels:
+    {{- include "gocd-prometheus-exporter.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "gocd-prometheus-exporter.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret: {{ include (print $.Template.BasePath "/exporter-secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/exporter-configmap.yaml") . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "gocd-prometheus-exporter.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "gocd-prometheus-exporter.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ include "gocd-prometheus-exporter.fullname" . }}-secret
+          {{- if .Values.envFromSecret }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.envFromSecret }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- if .Values.exporter_config.baseurl }}
+            - "--goCd-server-url={{ .Values.exporter_config.baseurl }}"
+            {{- end }}
+            {{- if .Values.exporter_config.port }}
+            - "--port={{ .Values.exporter_config.port }}"
+            {{- end }}
+            {{- if .Values.exporter_config.endpoint }}
+            - "--endpoint={{ .Values.exporter_config.endpoint }}"
+            {{- end }}
+            {{- if  .Values.exporter_config.logLevel }}
+            - "--log-level={{ .Values.exporter_config.logLevel }}"
+            {{- end }}
+            {{- if .Values.exporter_config.insecure }}
+            - "--insecure-tls={{ .Values.exporter_config.insecure }}"
+            {{- end }}
+            {{- if .Values.exporter_config.ca_path }}
+            - "--ca-path={{ .Values.exporter_config.ca_path }}"
+            {{- end }}
+            {{- if .Values.exporter_config.skip_metrics }}
+            {{- range .Values.exporter_config.skip_metrics }}
+            - "--skip-metrics={{ . }}"
+            {{- end }}
+            {{- end }}
+            {{- if .Values.exporter_config.default_cron }}
+            - "--api-cron-schedule={{ .Values.exporter_config.default_cron }}"
+            {{- end }}
+            {{- if .Values.exporter_config.config_file_path }}
+            - "--config-file={{ .Values.exporter_config.config_file_path }}"
+            {{- end }}
+            {{- if .Values.exporter_config.grace_duration }}
+            - "--grace-duration={{ .Values.exporter_config.grace_duration }}"
+            {{- end }}
+            {{- with .Values.exporter_config_yaml }}
+            - "--config-file=/config/gocd-prometheus-exporter.yaml"
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.httpPort }}
+          {{- with .Values.exporter_config_yaml }}
+          volumeMounts:
+            - name: exporter-config
+              mountPath: "/config/"
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: {{ .Values.service.metricsPort.name }}
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: {{ .Values.service.metricsPort.name }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.exporter_config_yaml }}
+      volumes:
+        - name: exporter-config
+          configMap:
+            name: "gocd-prometheus-exporter-config"
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

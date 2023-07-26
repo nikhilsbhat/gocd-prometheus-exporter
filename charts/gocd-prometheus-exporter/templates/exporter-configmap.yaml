@@ -1,0 +1,15 @@
+{{- if .Values.exporter_config_yaml }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gocd-prometheus-exporter.fullname" . }}-config
+  labels:
+    {{- include "gocd-prometheus-exporter.labels" . | nindent 4 }}
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+{{- range $path, $config := .Values.exporter_config_yaml }}
+  {{ $path }}: |
+{{ tpl $config $ | indent 4 -}}
+{{- end -}}
+{{- end -}}

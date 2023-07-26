@@ -1,0 +1,153 @@
+# Default values for gocd-prometheus-exporter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: basnik/gocd-prometheus-exporter
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+initContainers: []
+
+envFromSecret: ""
+
+extraArgs: []
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  seccompProfile:
+    type: "RuntimeDefault"
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  httpPort: 8090
+  metricsPort:
+    name: http
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+## gocd-prometheus-export's config in yaml file,
+# Example: https://github.com/nikhilsbhat/gocd-prometheus-exporter/blob/master/gocd-prometheus-exporter.sample.yaml
+#  exporter_config_yaml: |
+#    gocd-username: "admin"
+#    gocd-password: "admin"
+#    log-level: info
+#    port: 8090
+#    api-cron-schedule: "20s"
+#    skip-metrics:
+#      - server_health
+#      - config_repo_count
+#    metric-cron:
+#      agent_down: "60s"
+#      pipeline_count: "90m"
+
+exporter_config_yaml:
+  gocd-prometheus-exporter.yaml: |
+    metric-cron:
+      agent_down: "60s"
+      pipeline_count: "60s"
+
+exporter_config:
+  ## Base URL of the GoCD server to connect to
+  # baseurl: "example.gocd.com/go"
+
+  ## Auth parameters to be used while connecting to the GoCD server
+  # username: "admin"
+  # password: "admin"
+  # `bearer_token` will always take precedence over `password`, so when both are set, `bearer_token` will be considered.
+  # bearer_token: ""
+
+  ## The log level to be set for exporter. It supports all levels that Library Logrus supports.
+  # https://github.com/nikhilsbhat/gocd-sdk-go/blob/9715f524683920696bf67dd1d9fe89f77157249f/pkg/logger/log.go#L10
+  logLevel: info
+  endpoint: /metrics
+
+  ## The path to the yaml config file that should be used by the exporter
+  # config_file_path: "path/to/config/file"
+
+  ## If enabled
+  # insecure: false
+
+  ## Path to the CA file to be used by the exporter while making client connections to GoCD.
+  # ca_path: ""
+
+  ## List of metrics to be skipped while collecting metrics from the GoCD server.
+  # skip_metrics:
+  #   - agent_disk_space
+  #   - pipeline_size
+
+  ## Default cron timing to be used by the exporter
+  # Cron specific to metrics can only be configured using a config file for now.
+  # Example:
+  # default_cron: 30s
+  default_cron: 30s
+
+  ## Duration that the exporter takes to gracefully shutdown the moment that it receives the sig-term signal.
+  grace_duration: 1s
+
+
