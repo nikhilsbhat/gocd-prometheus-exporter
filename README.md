@@ -28,7 +28,7 @@ And the cron would address this issue by invoking these APIs on a schedule basis
 
 ## Installation
 
-* Recommend installing released versions. Release binaries are available on the [releases](https://github.com/nikhilsbhat/gocd-prometheus-exporter/releases) page and docker from [here](https://hub.docker.com/repository/docker/basnik/gocd-prometheus-exporter).
+* Recommend installing released versions. Release binaries are available on the [releases](https://github.com/nikhilsbhat/gocd-prometheus-exporter/releases) page and docker from [here](https://github.com/nikhilsbhat/gocd-prometheus-exporter/pkgs/container/gocd-prometheus-exporter).
 * Can always build it locally by running `go build` against cloned repo.
 
 #### Docker
@@ -39,7 +39,7 @@ docker pull ghcr.io/nikhilsbhat/gocd-prometheus-exporter:<github-release-tag>
 ```
 #### Kubernetes
 
-The helm chart is published to OCI based registry ghcr.io, the list of all versions can be found here.</br>
+The helm chart is published to OCI based registry ghcr.io, the list of all versions can be found [here](https://github.com/nikhilsbhat/gocd-prometheus-exporter/pkgs/container/charts%2Fgocd-prometheus-exporter). </br>
 Since the helm charts are published to OCI based registry, refer the [document](https://helm.sh/docs/topics/registries/) to work with charts published at OCI based registries.
 
 ```bash
