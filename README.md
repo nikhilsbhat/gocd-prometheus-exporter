@@ -31,6 +31,23 @@ And the cron would address this issue by invoking these APIs on a schedule basis
 * Recommend installing released versions. Release binaries are available on the [releases](https://github.com/nikhilsbhat/gocd-prometheus-exporter/releases) page and docker from [here](https://hub.docker.com/repository/docker/basnik/gocd-prometheus-exporter).
 * Can always build it locally by running `go build` against cloned repo.
 
+#### Docker
+
+```bash
+docker pull ghcr.io/nikhilsbhat/gocd-prometheus-exporter:latest
+docker pull ghcr.io/nikhilsbhat/gocd-prometheus-exporter:<github-release-tag>
+```
+#### Kubernetes
+
+The helm chart is published to OCI based registry ghcr.io, the list of all versions can be found here.</br>
+Since the helm charts are published to OCI based registry, refer the [document](https://helm.sh/docs/topics/registries/) to work with charts published at OCI based registries.
+
+```bash
+helm pull oci://ghcr.io/nikhilsbhat/gocd-prometheus-exporter/gocd-prometheus-exporter --version 0.1.2
+# Below command should help in installing release.
+helm install [RELEASE_NAME] oci://ghcr.io/nikhilsbhat/gocd-prometheus-exporter/gocd-prometheus-exporter --version 0.1.2
+```
+
 ## Usage
 ```shell
 NAME:
@@ -39,32 +56,32 @@ NAME:
 USAGE:
    gocd-prometheus-exporter [flags]
 
+AUTHOR:
+   Nikhil Bhat <nikhilsbhat93@gmail.com>
+
 COMMANDS:
    version, v  version of the gocd-prometheus-exporter
    help, h     Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --api-cron-schedule value, --cron value        cron expression to schedule the metric collection.
-                                                    - 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
-                                                      and stores the latest values in memory.
-                                                    - This is to reduce the load on the GoCd server when api requests are made to GoCd.
-                                                    - All expressions supported by https://github.com/robfig/cron will be supported (default: "@every 30s")
-   --ca-path value, --ca value                    path to file containing CA information to make secure connections to GoCd
-   --config-file value, -c value                  path to file containing configurations for exporter (default: "$HOME/gocd-prometheus-exporter.yaml")
-   --disk-cron-schedule value, --disk-cron value  cron expression to schedule the pipeline disk usage metric collection.
-                                                    - This is to reduce the reduce resource consumed while computing the pipeline disk size. (default: "@every 30s")
-   --endpoint value, -e value                     path under which the metrics to be exposed (default: "/metrics")
-   --goCd-password value, --password value        required password for establishing connection to GoCd server if auth enabled [$GOCD_PASSWORD]
-   --goCd-server-url value, --server value        GoCd server url to which the exporter needs to be connected
-   --goCd-username value, --user value            required username for establishing connection to GoCd server if auth enabled [$GOCD_USERNAME]
-   --grace-duration value, -d value               time duration to wait before stopping the service (default: 5s)
-   --help, -h                                     show help (default: false)
-   --insecure-tls, --insecure                     enable insecure TLS if you wish to connect to GOCD insecurily (default: false)
-   --log-level value, --log value                 set log level for the GoCd exporter (default: "info")
-   --pipeline-path value, --pt value              list of paths to pipelines that needs tp be monitored  (accepts multiple inputs)
-   --pipeline-root-path value, --root-path value  root path of pipeline that needs to be monitored
-   --port value, -p value                         port on which the metrics to be exposed (default: 8090)
-   --skip-metrics value, --sk value               list of metrics to be skipped  (accepts multiple inputs)
+   --log-level value, --log value                                           set log level for the GoCd exporter (default: "info")
+   --port value, -p value                                                   port on which the metrics to be exposed (default: 8090)
+   --endpoint value, -e value                                               path under which the metrics to be exposed (default: "/metrics")
+   --goCd-server-url value, --server value                                  GoCd server url to which the exporter needs to be connected
+   --goCd-username value, --user value                                      required username for establishing connection to GoCd server if auth enabled [$GOCD_USERNAME]
+   --goCd-password value, --password value                                  required password for establishing connection to GoCd server if auth enabled [$GOCD_PASSWORD]
+   --goCd-bearer-token value, --token value                                 required bearer-token for establishing connection to GoCd server if auth enabled [$GOCD_BEARER_TOKEN]
+   --insecure-tls, --insecure                                               enable insecure TLS if you wish to connect to GOCD insecurily (default: false)
+   --ca-path value, --ca value                                              path to file containing CA information to make secure connections to GoCd
+   --grace-duration value, -d value                                         time duration to wait before stopping the service (default: 5s)
+   --config-file value, -c value                                            path to file containing configurations for exporter (default: "/Users/nikhil.bhat/gocd-prometheus-exporter.yaml")
+   --skip-metrics value, --sk value [ --skip-metrics value, --sk value ]    list of metrics to be skipped
+   --api-cron-schedule value, --cron value                                  cron expression to schedule the metric collection.
+                                                                              - 'gocd-prometheus-exporter' schedules the job to collect the metrics in the specified intervals
+                                                                                and stores the latest values in memory.
+                                                                              - This is to reduce the load on the GoCd server when api requests are made to GoCd.
+                                                                              - All expressions supported by github.com/go-co-op/gocron will be supported (default: "30s")
+   --help, -h                                                               show help
 ```
 
 ### Run

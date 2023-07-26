@@ -6,3 +6,4 @@ prometheus.yml
 cover.out
 cover.html
 gocd-prometheus-exporter.yaml
+*.tgz

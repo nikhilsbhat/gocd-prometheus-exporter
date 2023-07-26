@@ -3,6 +3,7 @@ MY_ADDRESS := $(shell ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print
 BUILD_ENVIRONMENT?=${ENVIRONMENT}
 GOVERSION?=$(shell go version | awk '{printf $$3}')
 APP_DIR?=$(shell git rev-parse --show-toplevel)
+HELM_CHART_REPO=oci://ghcr.io/nikhilsbhat/charts
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -52,5 +53,15 @@ report: ## Publishes the go-report of the appliction (uses go-reportcard)
 generate.document: ## generates cli documents using 'github.com/nikhilsbhat/urfavecli-docgen'.
 	@go generate github.com/nikhilsbhat/gocd-prometheus-exporter/docs
 
-test: ## runs test cases
+test: ## Runs test cases
 	@go test ./... -mod=vendor -coverprofile cover.out && go tool cover -html=cover.out -o cover.html && open cover.html
+
+helm.package: ## Packages the helm chart to make it ready for publishing.
+	@rm -rf gocd-prometheus-exporter-*
+	@helm package charts/gocd-prometheus-exporter/ -d charts/
+
+helm.registry.login: ## Logins to ghcr oci helm registry.
+	echo "${GITHUB_TOKEN}" | helm registry login ghcr.io/nikshilsbhat --username nikhilsbhat --password-stdin
+
+helm.publish: helm.package helm.registry.login ## Should publish helm chart to oci based ghcr helm registries.
+	@helm push charts/*.tgz ${HELM_CHART_REPO}
