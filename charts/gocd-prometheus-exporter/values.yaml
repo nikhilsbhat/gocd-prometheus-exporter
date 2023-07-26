@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: basnik/gocd-prometheus-exporter
+  repository: ghcr.io/nikhilsbhat/gocd-prometheus-exporter
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
