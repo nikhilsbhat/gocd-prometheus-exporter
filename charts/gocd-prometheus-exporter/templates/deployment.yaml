@@ -79,13 +79,19 @@ spec:
             {{- with .Values.exporter_config_yaml }}
             - "--config-file=/config/gocd-prometheus-exporter.yaml"
             {{- end }}
+            {{- range .Values.extraArgs }}
+            {{ . | quote }},
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.httpPort }}
-          {{- with .Values.exporter_config_yaml }}
           volumeMounts:
+          {{- with .Values.exporter_config_yaml }}
             - name: exporter-config
               mountPath: "/config/"
+          {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+          {{- toYaml . | nindent 12 }}
           {{- end }}
           livenessProbe:
             httpGet:
@@ -97,12 +103,6 @@ spec:
               port: {{ .Values.service.metricsPort.name }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.exporter_config_yaml }}
-      volumes:
-        - name: exporter-config
-          configMap:
-            name: "gocd-prometheus-exporter-config"
-      {{- end }}
       {{- with .Values.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}
@@ -118,4 +118,13 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- with .Values.exporter_config_yaml }}
+        - name: exporter-config
+          configMap:
+            name: "gocd-prometheus-exporter-config"
+      {{- end }}
+      {{- with .Values.extraVolumes }}
+      {{- toYaml . | nindent 8 }}
       {{- end }}

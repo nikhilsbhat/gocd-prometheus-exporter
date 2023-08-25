@@ -5,11 +5,15 @@
 replicaCount: 1
 
 image:
+  # -- Image to be used
   repository: ghcr.io/nikhilsbhat/gocd-prometheus-exporter
+  # -- Pull policy to be set
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
+  # -- Image version to be deployed, defaults to chart version
   tag: ""
 
+# -- List of image pull secrets to be used for pulling images in the case of a protected image registry.
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -23,12 +27,16 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# -- Additional annotations to be added to the exporter pod.
 podAnnotations: {}
 
+# -- List of init containers that should be deployed along with exporter deployment.
 initContainers: []
 
+# -- Secret to be used to set the environment variables, for example setting GoCD password.
 envFromSecret: ""
 
+# -- Other CLI args that needs to be set, can be passed here, ex: --insecure=false
 extraArgs: []
 
 podSecurityContext:
@@ -106,48 +114,63 @@ affinity: {}
 #      agent_down: "60s"
 #      pipeline_count: "90m"
 
+# -- Any exporter configs which need not be passed as CLI args can be defined in a configuration file and passed to exporter.
 exporter_config_yaml:
   gocd-prometheus-exporter.yaml: |
     metric-cron:
       agent_down: "60s"
       pipeline_count: "60s"
 
+# -- Any exporter configs those are defined/declared here goes in as CLI args to the exporter deployment.
 exporter_config:
-  ## Base URL of the GoCD server to connect to
+  # -- Base URL of the GoCD server to connect to
   # baseurl: "example.gocd.com/go"
 
-  ## Auth parameters to be used while connecting to the GoCD server
+  # -- Auth parameters to be used while connecting to the GoCD server
   # username: "admin"
   # password: "admin"
-  # `bearer_token` will always take precedence over `password`, so when both are set, `bearer_token` will be considered.
+  # -- `bearer_token` will always take precedence over `password`, so when both are set, `bearer_token` will be considered.
   # bearer_token: ""
 
-  ## The log level to be set for exporter. It supports all levels that Library Logrus supports.
+  # -- The log level to be set for exporter. It supports all levels that Library Logrus supports.
   # https://github.com/nikhilsbhat/gocd-sdk-go/blob/9715f524683920696bf67dd1d9fe89f77157249f/pkg/logger/log.go#L10
   logLevel: info
   endpoint: /metrics
 
-  ## The path to the yaml config file that should be used by the exporter
+  # -- The path to the yaml config file that should be used by the exporter
   # config_file_path: "path/to/config/file"
 
-  ## If enabled
+  # -- If enabled
   # insecure: false
 
-  ## Path to the CA file to be used by the exporter while making client connections to GoCD.
+  # -- Path to the CA file to be used by the exporter while making client connections to GoCD.
   # ca_path: ""
 
-  ## List of metrics to be skipped while collecting metrics from the GoCD server.
+  # -- List of metrics to be skipped while collecting metrics from the GoCD server.
   # skip_metrics:
   #   - agent_disk_space
   #   - pipeline_size
 
-  ## Default cron timing to be used by the exporter
+  # -- Default cron timing to be used by the exporter
   # Cron specific to metrics can only be configured using a config file for now.
   # Example:
   # default_cron: 30s
   default_cron: 30s
 
-  ## Duration that the exporter takes to gracefully shutdown the moment that it receives the sig-term signal.
+  # -- Duration that the exporter takes to gracefully shutdown the moment that it receives the sig-term signal.
   grace_duration: 1s
 
+# A list of additional Volume to add to the deployment
+# this is useful if the volume you need is not a secret (the CA certificate to be used for CA based auth is enabled.)
+extraVolumes: []
+#  - name: gocd-server-ca
+#    configMap:
+#      name: "gocd-server-ca"
 
+#  A list of additional VolumeMounts to add to the deployment
+#  this is useful for mounting any other needed resource into
+#  the gocd-prometheus-exporter's pod
+extraVolumeMounts: []
+#  - name: csi-volume
+#    mountPath: /csi/volume
+#    readOnly: true

@@ -52,9 +52,13 @@ report: ## Publishes the go-report of the appliction (uses go-reportcard)
 
 generate.document: ## generates cli documents using 'github.com/nikhilsbhat/urfavecli-docgen'.
 	@go generate github.com/nikhilsbhat/gocd-prometheus-exporter/docs
+	@helm-docs -c charts/gocd-prometheus-exporter
 
 test: ## Runs test cases
 	@go test ./... -mod=vendor -coverprofile cover.out && go tool cover -html=cover.out -o cover.html && open cover.html
+
+docker.login: ## Should login to ghcr docker registry.
+	@echo "${GITHUB_TOKEN}" | docker login ghcr.io -u nikshilsbhat --password-stdin
 
 helm.package: ## Packages the helm chart to make it ready for publishing.
 	@rm -rf gocd-prometheus-exporter-*
